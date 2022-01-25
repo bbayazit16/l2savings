@@ -1,5 +1,4 @@
 import "./App.css";
-import { getRandom as randomUserAgent } from "random-useragent";
 import { useEffect, useState, useRef } from "react";
 import { ethers } from "ethers";
 import { createIcon } from "@download/blockies";
@@ -286,12 +285,7 @@ const App = () => {
   const getOptimismInfo = async () => {
     //
     const response = await fetch(
-      `https://api-optimistic.etherscan.io/api?module=account&action=txlist&address=${account.address}&sort=desc&apikey=AUK6ZKXZXDDFJ5MYY8G287Z9D4D57SYVF8`,
-      {
-        headers: {
-          "user-agent": randomUserAgent(),
-        },
-      }
+      `https://api-optimistic.etherscan.io/api?module=account&action=txlist&address=${account.address}&sort=desc&apikey=AUK6ZKXZXDDFJ5MYY8G287Z9D4D57SYVF8`
     );
 
     const data = await response.json();
@@ -358,12 +352,7 @@ const App = () => {
   const getArbitrumInfo = async () => {
     //
     const response = await fetch(
-      `https://api.arbiscan.io/api?module=account&action=txlist&address=${account.address}&sort=desc&apikey=8PZFKWRJSCDH5SEJ6QP2DTM2QN6DK2Q1UV`,
-      {
-        headers: {
-          "user-agent": randomUserAgent(),
-        },
-      }
+      `https://api.arbiscan.io/api?module=account&action=txlist&address=${account.address}&sort=desc&apikey=8PZFKWRJSCDH5SEJ6QP2DTM2QN6DK2Q1UV`
     );
 
     const data = await response.json();
