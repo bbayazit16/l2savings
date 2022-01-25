@@ -1,0 +1,65 @@
+.buttonish {
+  display: flex;
+  cursor: pointer;
+  border: 0.15rem solid var(--border-color);
+  background-color: var(--buttonish-color);
+  border-radius: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  height: 3rem;
+  width: auto;
+  margin: 10px;
+  font-size: large;
+  padding: 0.25rem;
+  font-size: 1.4rem;
+  transition: 0.5s;
+  overflow: auto;
+  overflow-y: hidden;
+  user-select: none;
+}
+
+.buttonish:hover {
+  background-color: var(--buttonish-hover);
+  transform: scale(1.1);
+}
+
+.buttonish p {
+  margin-left: 10px;
+  margin-right: 5px;
+}
+
+.buttonishphotocontainer {
+  border-radius: 1rem;
+  height: 2rem;
+  width: 2rem;
+  background: black;
+  overflow: hidden;
+  padding: 2px;
+  margin: 5px;
+}
+
+.buttonishphotocontainer.invisible {
+  background: var(--buttonish-color);
+}
+
+.buttonish:hover .buttonishphotocontainer.invisible {
+  background: var(--buttonish-hover);
+}
+
+.nodecoration {
+  text-decoration: none;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.buttonishphoto {
+  height: 100%;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.pad {
+  padding: 0.1rem;
+}

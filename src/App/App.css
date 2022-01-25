@@ -1,0 +1,139 @@
+.head {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 94%;
+  width: 96%;
+  margin: 2%;
+  margin-bottom: 4%;
+}
+
+.shockinginfo {
+  color: var(--shocking-info);
+}
+
+nav {
+  display: flex;
+  height: 10%;
+}
+
+.left-info {
+  display: flex;
+  justify-content: flex-start;
+  width: 50%;
+}
+
+.left-info div {
+  margin-right: 2rem;
+}
+
+.right-info {
+  display: flex;
+  flex-direction: row-reverse;
+  width: 50%;
+}
+
+.stats {
+  display: flex;
+}
+
+.logo {
+  display: flex;
+  height: auto;
+  width: auto;
+  justify-content: center;
+}
+
+.logo img {
+  max-height: 100%;
+  max-width: auto;
+}
+
+.logo p {
+  font-size: x-large;
+  user-select: none;
+  margin-left: 0.5rem;
+}
+
+.logo p:hover {
+  user-select: none;
+}
+
+.gasprice-container {
+  display: flex;
+  height: auto;
+  width: auto;
+  user-select: none;
+}
+
+.gasprice-container p {
+  line-height: 3rem;
+  font-size: large;
+  font-weight: normal;
+}
+
+.gasprice-container span {
+  color: var(--shocking-info);
+}
+
+.walletcontainer {
+  display: flex;
+  top: 5%;
+}
+
+.infocontainer {
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  margin-top: 5%;
+  height: 55%;
+  width: 50%;
+  text-align: justify;
+  font-size: 28px;
+  background-color: var(--info-text-color);
+  border-radius: 1rem;
+  overflow: auto;
+}
+
+.chains {
+  display: flex;
+  border-bottom: 0.2rem solid var(--chains-border);
+  justify-content: space-evenly;
+}
+
+.maintext {
+  display: flex;
+  flex-direction: column;
+  height: 82%;
+}
+
+.maintext p {
+  margin: 2%;
+  cursor: default;
+}
+
+.leftbottom {
+  position: absolute;
+  display: flex;
+  left: 0;
+  bottom: 0;
+}
+
+.disclaimer {
+  font-size: small;
+  font-weight: lighter;
+  line-height: 2px;
+  color: var(--disclaimer-color);
+  user-select: none;
+}
+
+.rightbottom {
+  position: absolute;
+  display: flex;
+  right: 0;
+  bottom: 0;
+}
+
+.socials {
+  display: flex;
+}
