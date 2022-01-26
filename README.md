@@ -145,7 +145,6 @@ serve -s build
 ## Made Possible Thanks To
 
 - @download/blockies for blockies identicons
-- Random User Agent
 - Chainlink Oracles
 - Metamask
 - WalletConnect
