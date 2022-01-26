@@ -14,6 +14,7 @@ const Buttonish = ({
   href,
   newTab,
   download,
+  imgExtraClass,
 }) => {
   return !isAnchor ? (
     <div className={"buttonish " + (extraProperty || "")} onClick={onClick}>
@@ -27,7 +28,7 @@ const Buttonish = ({
           <img
             src={img}
             alt={alt}
-            className="buttonishphoto"
+            className={"buttonishphoto " + (imgExtraClass || "")}
             style={
               imgSize ? { height: imgSize.height, width: imgSize.width } : null
             }
@@ -54,7 +55,7 @@ const Buttonish = ({
           <img
             src={img}
             alt={alt}
-            className="buttonishphoto"
+            className={"buttonishphoto " + (imgExtraClass || "")}
             style={
               imgSize ? { height: imgSize.height, width: imgSize.width } : null
             }
@@ -78,6 +79,7 @@ Buttonish.propTypes = {
   href: PropTypes.string,
   newTab: PropTypes.bool,
   download: PropTypes.string,
+  imgExtraClass: PropTypes.string,
 };
 
 export default Buttonish;

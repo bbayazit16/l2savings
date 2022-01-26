@@ -16,13 +16,17 @@ import twitterlogo from "../Assets/twitterlogo.svg";
 import metamasklogo from "../Assets/metamasklogo.svg";
 import walletconnectlogo from "../Assets/walletconnectlogo.svg";
 import githublogo from "../Assets/githublogo.png";
+import zksync from "../Assets/zksync.svg";
 //
 
 const App = () => {
+  const [connectWalletClicked, setConnectWalletClicked] = useState(false);
+
+  // Chains
   const [showAllChains, setShowAllChains] = useState(true);
   const [showOptimism, setShowOptimism] = useState(false);
   const [showArbitrum, setShowArbitrum] = useState(false);
-  const [connectWalletClicked, setConnectWalletClicked] = useState(false);
+  const [showZkSync, setShowZkSync] = useState(false);
 
   const walletContainerRef = useRef();
 
@@ -102,6 +106,7 @@ const App = () => {
     setShowAllChains(false);
     setShowOptimism(false);
     setShowArbitrum(false);
+    setShowZkSync(false);
   };
 
   const toEther = num => {
@@ -758,6 +763,19 @@ const App = () => {
             alt={"Arbitrum Icon"}
             extraProperty={"pad"}
           />
+
+          <Buttonish
+            text={"ZkSync"}
+            onClick={() => {
+              unclick();
+              setShowZkSync(true);
+            }}
+            img={zksync}
+            imgSize={{ height: "18px" }}
+            alt={"ZkSync Icon"}
+            extraProperty={"pad"}
+            imgExtraClass={"zksync"}
+          />
         </div>
 
         <div className="maintext">
@@ -801,6 +819,24 @@ const App = () => {
             <InfoText
               textColor={"#4e82ea"}
               mainColor={"#4e9fea"}
+              txCount={info.arbitrum.txCount}
+              chainName={"Arbitrum"}
+              nativeGasSpent={info.arbitrum.nativeGasSpent}
+              L2feesEther={info.arbitrum.L2feesEther}
+              L2feesUSD={info.arbitrum.L2feesUSD}
+              gasSpent={info.arbitrum.gasSpent}
+              L1feesEther={info.arbitrum.L1feesEther}
+              L1feesUSD={info.arbitrum.L1feesUSD}
+              feesSavedEther={info.arbitrum.feesSavedEther}
+              feesSavedUSD={info.arbitrum.feesSavedUSD}
+              timesCheaper={info.arbitrum.timesCheaper}
+            />
+          ) : null}
+
+          {showZkSync ? (
+            <InfoText
+              textColor={"#6e73b8"}
+              mainColor={"#4e5395"}
               txCount={info.arbitrum.txCount}
               chainName={"Arbitrum"}
               nativeGasSpent={info.arbitrum.nativeGasSpent}
