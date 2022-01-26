@@ -26,7 +26,7 @@ Following data is provided for every supported chain:
 
 Simply put,
 
-Fees if the transaction was sent on L2 at the same day with exactly the same gas - Actual fees paid for transaction on L2
+Fees if the transaction was sent on L1 at the same day with exactly the same gas - Actual fees paid for transaction on L2
 
 ### Optimism
 
