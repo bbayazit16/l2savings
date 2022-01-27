@@ -18,7 +18,9 @@ const Buttonish = ({
 }) => {
   return !isAnchor ? (
     <div className={"buttonish " + (extraProperty || "")} onClick={onClick}>
-      <p className={noWrap ? "nowrap" : null}>{text}</p>
+      <p className={(img ? null : "no-img ") + (noWrap ? "nowrap" : null)}>
+        {text}
+      </p>
       {img ? (
         <div
           className={
@@ -45,7 +47,9 @@ const Buttonish = ({
       target={newTab ? "_blank" : "_self"}
       rel="noreferrer"
     >
-      <p>{text}</p>
+      <p className={(img ? null : "no-img ") + (noWrap ? "nowrap" : null)}>
+        {text}
+      </p>
       {img ? (
         <div
           className={

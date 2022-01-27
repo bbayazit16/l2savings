@@ -46,6 +46,10 @@
   background: var(--buttonish-hover);
 }
 
+.no-img {
+  text-indent: -5px;
+}
+
 .nodecoration {
   text-decoration: none;
 }
