@@ -21,15 +21,20 @@ import githublogo from "../Assets/githublogo.png";
 import zksync from "../Assets/zksync.svg";
 //
 
+// TODO: Add individual tx informations to download data
+
 const App = () => {
   const [connectWalletClicked, setConnectWalletClicked] = useState(false);
   const [randomTweet, setRandomTweet] = useState("");
 
-  // Chains
+  // Chain Show/Set buttons
   const [showAllChains, setShowAllChains] = useState(true);
   const [showOptimism, setShowOptimism] = useState(false);
   const [showArbitrum, setShowArbitrum] = useState(false);
   const [showZkSync, setShowZkSync] = useState(false);
+  //
+
+  const [zkSyncTxs, setZkSyncTxs] = useState([]);
 
   const walletContainerRef = useRef();
 
@@ -113,6 +118,17 @@ const App = () => {
     for (let key in obj) {
       for (let innerKey in obj[key]) {
         obj[key][innerKey] = localize(obj[key][innerKey]);
+      }
+    }
+  };
+
+  const decimalizeTx = arr => {
+    const irrelevantFields = new Set(["txHash", "txBaseURI"]);
+    for (const obj of arr) {
+      for (let key in obj) {
+        if (!irrelevantFields.has(key)) {
+          obj[key] = parseFloat(obj[key]).toFixed(4);
+        }
       }
     }
   };
@@ -611,6 +627,7 @@ const App = () => {
       "Withdraw",
       "WithdrawNFT",
       "ForcedExit",
+      "ChangePubKey",
     ]);
     //
     //
@@ -620,7 +637,7 @@ const App = () => {
     let nativeGasPredicted = 0;
     let feesIfOnMainnet = 0;
     let txCount = 0;
-
+    const txs = [];
     for (const data of allData) {
       //
       //
@@ -635,7 +652,7 @@ const App = () => {
         let type = op.type;
 
         if (irrelevantTransactions.has(type)) {
-          txCount++;
+          // txCount++;
           continue;
           //
         } else if (
@@ -650,52 +667,124 @@ const App = () => {
           // have been included in a batch.
           const isBatch = toEther(op.fee) === 0 ? true : false;
 
-          feesPaid += zkSyncFees(feeToken, toEther(op.fee), txTimestamp);
+          // fees paid
+          const fp = zkSyncFees(feeToken, toEther(op.fee), txTimestamp);
+          // fees if on mainnet
+          const fiom = toEther(ZkSyncGasMap[type].L1gasSpent * avgDailyGas);
+          //
+          //
+          feesPaid += fp;
           // include batch gas
           // if not in batch transaction
           if (!isBatch) {
             nativeGasPredicted += ZkSyncGasMap[type].nativeGasSpent;
             L1GasPredicted += ZkSyncGasMap[type].L1gasSpent;
-            feesIfOnMainnet += toEther(
-              ZkSyncGasMap[type].L1gasSpent * avgDailyGas
-            );
+            feesIfOnMainnet += fiom;
             txCount += 1;
+            //
+            //
+            txs.push({
+              txBaseURI: "https://zkscan.io/explorer/transactions/",
+              txHash: tx.txHash,
+              feesPaid: fp,
+              feeIfOnL1: fiom,
+              feeSaved: fiom - fp,
+              savingsMultiplier: fiom / fp,
+            });
+            //
+            //
           }
           //
           //
         } else if (type === "Swap") {
           //
           //
-          feesPaid += zkSyncFees(feeToken, toEther(op.fee), txTimestamp);
+          // fees paid
+          const fp = zkSyncFees(feeToken, toEther(op.fee), txTimestamp);
+          //
+          // fees if on mainnet
+          const fiom = toEther(ZkSyncGasMap[type].L1gasSpent * avgDailyGas);
+          //
+          feesPaid += fp;
           nativeGasPredicted += ZkSyncGasMap[type].nativeGasSpent;
           L1GasPredicted += ZkSyncGasMap[type].L1gasSpent;
-          feesIfOnMainnet += toEther(
-            ZkSyncGasMap[type].L1gasSpent * avgDailyGas
-          );
+          feesIfOnMainnet += fiom;
           txCount++;
+          //
+          //
+          txs.push({
+            txBaseURI: "https://zkscan.io/explorer/transactions/",
+            txHash: tx.txHash,
+            feesPaid: fp,
+            feeIfOnL1: fiom,
+            feeSaved: fiom - fp,
+            savingsMultiplier: fiom / fp,
+          });
           //
           //
         } else if (type === "MintNFT") {
           //
           //
-          feesPaid += zkSyncFees(feeToken, toEther(op.fee), txTimestamp);
+          // fees paid
+          const fp = zkSyncFees(feeToken, toEther(op.fee), txTimestamp);
+          //
+          const fiom = toEther(ZkSyncGasMap[type].L1gasSpent * avgDailyGas);
+          //
+          feesPaid += fp;
           nativeGasPredicted += ZkSyncGasMap[type].nativeGasSpent;
           L1GasPredicted += ZkSyncGasMap[type].L1gasSpent;
+          feesIfOnMainnet += fiom;
           txCount++;
           //
           //
-        } else if (type === "ChangePubKey") {
-          //
-          //
-          feesPaid += zkSyncFees(feeToken, toEther(op.fee), txTimestamp, true);
-          nativeGasPredicted += ZkSyncGasMap[type].nativeGasSpent;
-          L1GasPredicted += ZkSyncGasMap[type].L1gasSpent;
-          txCount++;
-          //
-          //
+          txs.push({
+            txBaseURI: "https://zkscan.io/explorer/transactions/",
+            txHash: tx.txHash,
+            feesPaid: fp,
+            feeIfOnL1: fiom,
+            feeSaved: fiom - fp,
+            savingsMultiplier: fiom / fp,
+          });
         }
+        //
+        // ====================================================
+        //
+        // Below is the implementation of ChangePubKey
+        // For now it is considered an "irrelevant" transaction.
+        //
+        // ====================================================
+        //
+        // else if (type === "ChangePubKey") {
+        // //
+        // //
+        // // fees paid
+        // const fp = zkSyncFees(feeToken, toEther(op.fee), txTimestamp, true);
+        // //
+        // // fees if on mainnet
+        // const fiom = 0;
+        // //
+        // feesPaid += fp;
+        // nativeGasPredicted += ZkSyncGasMap[type].nativeGasSpent;
+        // L1GasPredicted += ZkSyncGasMap[type].L1gasSpent;
+        // txCount++;
+        // //
+        // //
+        // txs.push({
+        //   txBaseURI: "https://zkscan.io/explorer/transactions/",
+        //   txHash: tx.txHash,
+        //   feesPaid: fp,
+        //   feeIfOnL1: fiom,
+        //   feeSaved: fiom - fp,
+        //   savingsMultiplier: fiom / fp,
+        // });
+        // //
+        // //
+        // }
       }
     }
+
+    decimalizeTx(txs);
+    setZkSyncTxs(txs);
 
     return {
       feesPaid: feesPaid,
@@ -1248,6 +1337,9 @@ const App = () => {
       </footer>
 
       <div className="tx-details">
+        {zkSyncTxs.map(tx => {
+          return <TxBox img={zksync} txObj={tx} />;
+        })}
       </div>
     </div>
   );
