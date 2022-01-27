@@ -21,6 +21,7 @@ import zksync from "../Assets/zksync.svg";
 
 const App = () => {
   const [connectWalletClicked, setConnectWalletClicked] = useState(false);
+  const [randomTweet, setRandomTweet] = useState("");
 
   // Chains
   const [showAllChains, setShowAllChains] = useState(true);
@@ -574,14 +575,16 @@ const App = () => {
         //
         feeToken = feeToken || tx.op.token;
         type = op.token === 0 ? "ETHTransfer" : "ERC20Transfer";
+        // The "isBatch" variable may have a misleading name.
+        // isBatch variable eliminates transactions that may
+        // have been included in a batch.
         const isBatch = toEther(op.fee) === 0 ? true : false;
 
         feesPaid += zkSyncFees(feeToken, toEther(op.fee), txTimestamp);
         // include batch gas
-        nativeGasPredicted += ZkSyncGasMap[type].nativeGasSpent;
-
-        // if not batch transaction
+        // if not in batch transaction
         if (!isBatch) {
+          nativeGasPredicted += ZkSyncGasMap[type].nativeGasSpent;
           L1GasPredicted += toEther(op.fee);
           feesIfOnMainnet += toEther(
             ZkSyncGasMap[type].L1gasSpent * avgDailyGas
@@ -620,6 +623,7 @@ const App = () => {
         //
       }
     }
+
     return {
       feesPaid: feesPaid,
       L1GasPredicted: Math.round(L1GasPredicted),
@@ -975,12 +979,13 @@ const App = () => {
               <Buttonish
                 text={"Tweet Your Stats"}
                 isAnchor={true}
+                onClick={() => {
+                  setRandomTweet(generateTweet());
+                }}
                 img={twitterlogo}
                 imgSize={{ height: "36px", width: "28px" }}
                 alt={"Twitter Logo"}
-                href={
-                  "https://twitter.com/intent/tweet?text=" + generateTweet()
-                }
+                href={"https://twitter.com/intent/tweet?text=" + randomTweet}
                 newTab={true}
               />
             </div>
