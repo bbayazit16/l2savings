@@ -9,7 +9,6 @@
   --disclaimer-color: #919191;
 }
 
-
 * {
   color: #ffffff;
   font-family: Dongle, sans-serif;
@@ -18,8 +17,13 @@
 
 body {
   background-color: var(--background-color);
-  background: rgb(16,29,51);
-  background: radial-gradient(circle, rgba(16,29,51,1) 10%, rgba(26,21,54,1) 90%);
+  background: rgb(16, 29, 51);
+  background: radial-gradient(
+    circle,
+    rgba(16, 29, 51, 1) 10%,
+    rgba(26, 21, 54, 1) 90%
+  );
+  /* credits to https://cssgradient.io/ for the awesome gradient maker! */
 }
 
 @font-face {
