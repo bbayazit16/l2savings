@@ -1122,7 +1122,7 @@ const App = () => {
       </div>
       <div className="leftbottom">
         <div>
-          <p className="disclaimer">Made possible by Etherscan API's.</p>
+          <p className="disclaimer">Made possible by Etherscan & ZkSync API's.</p>
           <p className="disclaimer">
             Data is provided as is, with no guarantee of accuracy. Expect up to
             10% inaccuracy.
