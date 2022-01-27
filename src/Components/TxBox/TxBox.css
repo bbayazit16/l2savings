@@ -1,0 +1,49 @@
+small {
+  font-weight: normal;
+}
+
+.txbox {
+  display: flex;
+  height: 15%;
+  margin-left: 0;
+  width: calc(100% - 4px);
+  border: 2px solid var(--border-color);
+  background-color: var(--background-color);
+  justify-content: space-evenly;
+}
+
+.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.txbox-img-container {
+  width: 10%;
+}
+
+.txbox-img-container img {
+  height: 60%;
+  width: 60%;
+}
+
+.tx-hash {
+  padding: 2%;
+}
+
+.tx-hash a {
+  text-decoration: none;
+}
+
+.tx-hash a small {
+  text-decoration: underline;
+  color: lightblue;
+}
+
+.txbox-feespaid {
+  padding: 2%;
+}
+
+.shocking {
+  color: var(--shocking-info);
+}

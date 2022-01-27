@@ -8,6 +8,7 @@ import historicalGasPrices from "../historicalGasPrices.json";
 import Buttonish from "../Components/Buttonish/Buttonish";
 import Dropper from "../Components/Dropper/Dropper";
 import InfoText from "../Components/InfoText/InfoText";
+import TxBox from "../Components/TxBox/TxBox";
 // Asset Imports
 import optimism from "../Assets/optimism.svg";
 import arbitrum from "../Assets/arbitrum.svg";
@@ -980,8 +981,7 @@ const App = () => {
   }, [account.address]);
 
   return (
-    <div id="main">
-      {/* */}
+    <div className="main">
       <nav>
         <div className="left-info">
           <div className="logo">
@@ -1212,6 +1212,7 @@ const App = () => {
           ) : null}
         </div>
       </div>
+
       <footer>
         <div className="leftbottom">
           <div>
@@ -1245,6 +1246,9 @@ const App = () => {
           </div>
         </div>
       </footer>
+
+      <div className="tx-details">
+      </div>
     </div>
   );
 };
