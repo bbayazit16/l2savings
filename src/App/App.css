@@ -13,6 +13,7 @@
 }
 
 nav {
+  position: relative;
   display: flex;
   height: 10%;
 }

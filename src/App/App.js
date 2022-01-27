@@ -6,6 +6,7 @@ import WalletConnectProvider from "@walletconnect/ethereum-provider";
 import historicalGasPrices from "../historicalGasPrices.json";
 // Component Imports
 import Buttonish from "../Components/Buttonish/Buttonish";
+import Dropper from "../Components/Dropper/Dropper";
 import InfoText from "../Components/InfoText/InfoText";
 // Asset Imports
 import optimism from "../Assets/optimism.svg";
@@ -755,10 +756,8 @@ const App = () => {
           data.zkevm.transactionCount,
         gasSpent:
           data.ovm.gasUsed + data.avm.gasUsed + data.zkevm.L1GasPredicted,
-        nativeGasSpent:
-          data.ovm.gasUsed +
-          data.avm.arbgasUsed, // +
-          // data.zkevm.nativeGasPredicted,
+        nativeGasSpent: data.ovm.gasUsed + data.avm.arbgasUsed, // +
+        // data.zkevm.nativeGasPredicted,
         L2feesEther: fixFormat(L2FeesEther, 4),
         L2feesUSD: fixFormat(L2FeesEther * ETHUSD, 2),
         L1feesEther: fixFormat(L1FeesEther, 4),
@@ -1037,10 +1036,26 @@ const App = () => {
             )}
           </div>
 
+          <Dropper
+            text={"Bridge To L2's"}
+            names={[
+              "Hop Bridge",
+              "Optimistic Gateway",
+              "Arbitrum Bridge",
+              "ZkSync Wallet",
+            ]}
+            urls={[
+              "https://hop.exchange/",
+              "https://gateway.optimism.io/",
+              "https://bridge.arbitrum.io/",
+              "https://wallet.zksync.io/",
+            ]}
+          />
+
           {info.general.L2feesEther !== "..." ? (
             <div className="stats">
               <Buttonish
-                text={"Download My Data"}
+                text={"Download Stats"}
                 noWrap={true}
                 isAnchor={true}
                 href={"data:text/json;charset=utf-8," + window.downloadData}
@@ -1053,7 +1068,7 @@ const App = () => {
                 }
               />
               <Buttonish
-                text={"Tweet Your Stats"}
+                text={"Tweet Stats"}
                 noWrap={true}
                 isAnchor={true}
                 onClick={() => {
