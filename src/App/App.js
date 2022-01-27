@@ -34,7 +34,7 @@ const App = () => {
   const emptyInfo = () => {
     return {
       general: {
-        L1GasPrice: "...",
+        L1FastGasPrice: "...",
         txCount: "...",
         gasSpent: "...",
         nativeGasSpent: "...",
@@ -920,7 +920,7 @@ const App = () => {
           </div>
           <div className="gasprice-container">
             <p>
-              L1 Fast Gas: <span>{info.general.L1GasPrice}</span> gwei
+              L1 Fast Gas: <span>{info.general.L1FastGasPrice}</span> gwei
             </p>
           </div>
         </div>
