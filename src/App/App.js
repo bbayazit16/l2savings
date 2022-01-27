@@ -642,8 +642,12 @@ const App = () => {
     const ETHUSD = await etherPrice();
     const currentGas = await gasPrice();
 
-    const L2FeesEther = data.ovm.feesPaid + data.avm.feesPaid;
-    const L1FeesEther = data.ovm.feesIfOnMainnet + data.avm.feesIfOnMainnet;
+    const L2FeesEther =
+      data.ovm.feesPaid + data.avm.feesPaid + data.zkevm.feesPaid;
+    const L1FeesEther =
+      data.ovm.feesIfOnMainnet +
+      data.avm.feesIfOnMainnet +
+      data.zkevm.feesIfOnMainnet;
 
     const fixFormat = (n, y) => {
       return parseFloat(n.toFixed(y));
@@ -669,10 +673,17 @@ const App = () => {
     // each key has a different purpose.
     return {
       general: {
-        L1GasPrice: currentGas,
-        txCount: data.ovm.transactionCount + data.avm.transactionCount,
-        gasSpent: data.ovm.gasUsed + data.avm.gasUsed,
-        nativeGasSpent: data.ovm.gasUsed + data.avm.arbgasUsed,
+        L1FastGasPrice: currentGas,
+        txCount:
+          data.ovm.transactionCount +
+          data.avm.transactionCount +
+          data.zkevm.transactionCount,
+        gasSpent:
+          data.ovm.gasUsed + data.avm.gasUsed + data.zkevm.L1GasPredicted,
+        nativeGasSpent:
+          data.ovm.gasUsed +
+          data.avm.arbgasUsed +
+          data.zkevm.nativeGasPredicted,
         L2feesEther: fixFormat(L2FeesEther, 4),
         L2feesUSD: fixFormat(L2FeesEther * ETHUSD, 2),
         L1feesEther: fixFormat(L1FeesEther, 4),
