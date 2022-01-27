@@ -179,6 +179,15 @@ const App = () => {
           tweet = `By using Ethereum L2 solution Optimism, I have saved Ξ${info.optimism.feesSavedEther} worth $${info.optimism.feesSavedUSD} and had my transactions instantly confirmed.`;
         }
         break;
+      case 8:
+        if (parseInt(info.zksync.txCount !== 0)) {
+          tweet = `By using Ethereum L2 solution Arbitrum, I have saved Ξ${info.zksync.feesSavedEther} worth $${info.zksync.feesSavedUSD} and had my transactions instantly confirmed.`;
+        } else {
+          tweet = `L2's make Ethereum usable again. I've saved $${info.general.L1feesUSD} by using L2's, while having instant confirmations and Ethereum Mainnet's security and decentralization.`;
+        }
+        break;
+      case 9:
+        tweet = `My L2 transactions have saved me $${info.general.L1feesUSD}, while being as secure and decentralized as Ethereum Mainnet.`;
       default:
         //
         break;
@@ -1122,7 +1131,9 @@ const App = () => {
       </div>
       <div className="leftbottom">
         <div>
-          <p className="disclaimer">Made possible by Etherscan & ZkSync API's.</p>
+          <p className="disclaimer">
+            Made possible by Etherscan & ZkSync API's.
+          </p>
           <p className="disclaimer">
             Data is provided as is, with no guarantee of accuracy. Expect up to
             10% inaccuracy.
