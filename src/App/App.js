@@ -333,36 +333,53 @@ const App = () => {
     let gasUsed = 0;
     let feesIfOnMainnet = 0;
     let txCount = 0;
+    // If an address has sent a transaction
+    // to itself, Etherscan api returns
+    // the tx twice.
+    // The initial design was skipping the
+    // next transaction if the sender == receiver.
+    // However storing txs in the array is potentially
+    // less buggy and provides more protection
+    // against other Etherscan api bugs, if there are.
+    const seenTxs = [];
+    //
+    //
     for (const tx of data.result) {
       //
-      if (tx.from.toLowerCase() === account.address.toLowerCase()) {
+      //
+      if (!seenTxs.includes(tx.hash)) {
         //
-        const serialized = ethers.utils.serializeTransaction({
-          // Eslint does not recognize BigInt
-          nonce: parseInt(tx.nonce, 16),
-          // eslint-disable-next-line no-undef
-          gasPrice: BigInt(tx.gasPrice, 16),
-          // eslint-disable-next-line no-undef
-          gasLimit: BigInt(tx.gasUsed, 16),
-          to: tx.to,
-          // eslint-disable-next-line no-undef
-          value: BigInt(tx.value, 16),
-          data: tx.input,
-        });
+        seenTxs.push(tx.hash);
+        //
+        if (tx.from.toLowerCase() === account.address.toLowerCase()) {
+          //
+          const serialized = ethers.utils.serializeTransaction({
+            // Eslint does not recognize BigInt
+            nonce: parseInt(tx.nonce, 16),
+            // eslint-disable-next-line no-undef
+            gasPrice: BigInt(tx.gasPrice, 16),
+            // eslint-disable-next-line no-undef
+            gasLimit: BigInt(tx.gasUsed, 16),
+            to: tx.to,
+            // eslint-disable-next-line no-undef
+            value: BigInt(tx.value, 16),
+            data: tx.input,
+          });
 
-        const L2GasPrice = tx.gasPrice;
-        const L2GasUsed = tx.gasUsed;
-        const L1GasLimit = ovmL1GasUsed(serialized, tx.blockNumber);
-        const L1GasPrice = averageDailyGas(parseInt(tx.timeStamp));
-        const feeScalar = getOVML1FeeScalar(tx.blockNumber);
+          const L2GasPrice = tx.gasPrice;
+          const L2GasUsed = tx.gasUsed;
+          const L1GasLimit = ovmL1GasUsed(serialized, tx.blockNumber);
+          const L1GasPrice = averageDailyGas(parseInt(tx.timeStamp));
+          const feeScalar = getOVML1FeeScalar(tx.blockNumber);
 
-        feesPaid +=
-          L2GasUsed * L2GasPrice + L1GasLimit * L1GasPrice * feeScalar;
-        gasUsed += parseInt(tx.gasUsed);
-        // Optimism is Ethereum equivalent. Ethereum Mainnet gas
-        // spent would be approximately the same.
-        feesIfOnMainnet += L2GasUsed * L1GasPrice;
-        txCount++;
+          feesPaid +=
+            L2GasUsed * L2GasPrice + L1GasLimit * L1GasPrice * feeScalar;
+          gasUsed += parseInt(tx.gasUsed);
+          // Optimism is Ethereum equivalent. Ethereum Mainnet gas
+          // spent would be approximately the same.
+          feesIfOnMainnet += L2GasUsed * L1GasPrice;
+          txCount++;
+        }
       }
     }
 
@@ -401,30 +418,48 @@ const App = () => {
     let gasUsed = 0;
     let feesIfOnMainnet = 0;
     let txCount = 0;
+    // If an address has sent a transaction
+    // to itself, Etherscan api returns
+    // the tx twice.
+    // The initial design was skipping the
+    // next transaction if the sender == receiver.
+    // However storing txs in the array is potentially
+    // less buggy and provides more protection
+    // against other Etherscan api bugs, if there are.
+    const seenTxs = [];
+    //
+    //
     for (const tx of data.result) {
-      if (tx.from.toLowerCase() === account.address.toLowerCase()) {
-        // Arbiscan api returns the gas price bid and not the
-        // actual gas price paid. On average actual gas price
-        // paid is 0.27 gwei less. (from my observations)
-        const L2Gas = parseInt(tx.gasUsed);
-        const L2GasPrice = parseInt(tx.gasPrice) - 270000000;
-        const L1GasPrice = avmL1GasScalar(L2GasPrice, tx.timeStamp);
+      //
+      //
+      if (!seenTxs.includes(tx.hash)) {
+        //
+        seenTxs.push(tx.hash);
+        //
+        if (tx.from.toLowerCase() === account.address.toLowerCase()) {
+          // Arbiscan api returns the gas price bid and not the
+          // actual gas price paid. On average actual gas price
+          // paid is 0.27 gwei less. (from my observations)
+          const L2Gas = parseInt(tx.gasUsed);
+          const L2GasPrice = parseInt(tx.gasPrice) - 270000000;
+          const L1GasPrice = avmL1GasScalar(L2GasPrice, tx.timeStamp);
 
-        const feePaid = L2GasPrice * L2Gas;
+          const feePaid = L2GasPrice * L2Gas;
 
-        // Usually +- 10% uncertainty
-        // Compared ETH transfers, ERC20 approval costs
-        // and ran contracts manually on remix javascript fork
-        // to compare arbgas to regular gas.
-        const gasIfOnMainnet = Math.round(
-          L2Gas / ((L1GasPrice / (100000000000 + L2GasPrice * 1.45)) * 12)
-        );
+          // Usually +- 10% uncertainty
+          // Compared ETH transfers, ERC20 approval costs
+          // and ran contracts manually on remix javascript fork
+          // to compare arbgas to regular gas.
+          const gasIfOnMainnet = Math.round(
+            L2Gas / ((L1GasPrice / (100000000000 + L2GasPrice * 1.45)) * 12)
+          );
 
-        feesPaid += feePaid;
-        arbgasUsed += L2Gas;
-        gasUsed += gasIfOnMainnet;
-        feesIfOnMainnet += gasIfOnMainnet * L1GasPrice;
-        txCount++;
+          feesPaid += feePaid;
+          arbgasUsed += L2Gas;
+          gasUsed += gasIfOnMainnet;
+          feesIfOnMainnet += gasIfOnMainnet * L1GasPrice;
+          txCount++;
+        }
       }
     }
 
