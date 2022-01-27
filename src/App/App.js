@@ -757,8 +757,8 @@ const App = () => {
           data.ovm.gasUsed + data.avm.gasUsed + data.zkevm.L1GasPredicted,
         nativeGasSpent:
           data.ovm.gasUsed +
-          data.avm.arbgasUsed +
-          data.zkevm.nativeGasPredicted,
+          data.avm.arbgasUsed, // +
+          // data.zkevm.nativeGasPredicted,
         L2feesEther: fixFormat(L2FeesEther, 4),
         L2feesUSD: fixFormat(L2FeesEther * ETHUSD, 2),
         L1feesEther: fixFormat(L1FeesEther, 4),
@@ -1184,7 +1184,7 @@ const App = () => {
               mainColor={"#4e5395"}
               txCount={info.zksync.txCount}
               chainName={"ZkSync"}
-              nativeGasSpent={info.zksync.nativeGasSpent}
+              nativeGasSpent={"?"}
               L2feesEther={info.zksync.L2feesEther}
               L2feesUSD={info.zksync.L2feesUSD}
               gasSpent={info.zksync.gasSpent}
