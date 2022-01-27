@@ -442,8 +442,11 @@ const App = () => {
       };
     }
 
+    // .at(-1) not supported on mobile
+    const lastElementIndex = data.result.list.length - 1; 
+
     const firstTxDate =
-      Math.round(new Date(data.result.list.at(-1).createdAt).getTime() / 1000) -
+      Math.round(new Date(data.result.list[lastElementIndex].createdAt).getTime() / 1000) -
       86400; // subtract 1 day to be sure
 
     const eth_priceDataResponse = await fetch(
