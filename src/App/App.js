@@ -71,6 +71,18 @@ const App = () => {
         feesSavedUSD: "...",
         timesCheaper: "...",
       },
+      zksync: {
+        txCount: "...",
+        gasSpent: "...",
+        nativeGasSpent: "...",
+        L1feesEther: "...",
+        L1feesUSD: "...",
+        L2feesEther: "...",
+        L2feesUSD: "...",
+        feesSavedEther: "...",
+        feesSavedUSD: "...",
+        timesCheaper: "...",
+      },
     };
   };
 
@@ -204,14 +216,7 @@ const App = () => {
   // gas price. If no recent timestamp
   // is found returns 110 gwei.
   const averageDailyGas = timestamp => {
-    if (
-      timestamp >= historicalGasPrices.latest &&
-      timestamp < historicalGasPrices.latest
-    ) {
-      timestamp = historicalGasPrices["latest"];
-    } else {
-      timestamp = timestamp - (timestamp % 86400); // seconds per day
-    }
+    timestamp = timestamp - (timestamp % 86400); // seconds per day
     return historicalGasPrices[timestamp] || 110000000000; // 110 gwei
   };
 
@@ -403,12 +408,237 @@ const App = () => {
     };
   };
 
+  // ZkSync has "types" of transactions
+  // Each type of transaction returns different information.
+  const getZkSyncInfo = async () => {
+    // TODO: Add support for 100+ transactions
+    // Possible implementation:
+    // let latest = "latest", if transaction count > 100 latest = 100 and refetch
+    const response = await fetch(
+      `https://api.zksync.io/api/v0.2/accounts/${account.address}/transactions?from=latest&limit=100&direction=older`
+    );
+
+    const data = await response.json();
+
+    const firstTxDate =
+      Math.round(new Date(data.result.list.at(-1).createdAt).getTime() / 1000) -
+      86400; // subtract 1 day to be sure
+
+    const eth_priceDataResponse = await fetch(
+      `https://poloniex.com/public?command=returnChartData&currencyPair=USDT_ETH&start=${firstTxDate}&period=14400`
+    );
+
+    const ETH_RESPONSE_DATA = await eth_priceDataResponse.json();
+
+    // Starting from Wednesday, 31 March 2021 00:00:00, 4 Hourly Data
+    const ETHUSD_DATA = Object.fromEntries(
+      ETH_RESPONSE_DATA.map(obj => [obj.date, obj.close])
+    );
+
+    const currentEtherPrice = await etherPrice();
+
+    // ZkSync allows users to pay in multiple tokens.
+    // The API returns the "token ID". This function
+    // returns given token ID amount and date to Ether.
+    // Average daily ETH price data is used unless the
+    // date is not found, in which the current ETH price
+    // of the asset is returned.
+    // https://zkscan.io/explorer/tokens/
+    const zkSyncFees = (tokenId, fee, timestamp, isExpensive) => {
+      // fee should be in ether, not wei.
+      if (tokenId === 0) {
+        return fee;
+      }
+      // convert timestamp to the nearest 4 hour'th data
+      timestamp = timestamp - (timestamp % 14400); // 4 hours
+      const ETH_USD = ETHUSD_DATA[timestamp] || currentEtherPrice;
+      // Both NFT, ERC20 and Ether transfers are classified
+      // under the "transfer" function type.
+      // if id = 0, it's an ether transfer
+      // If the id is in token ID's, it's a token
+      // otherwise it's an nft.
+      // NFT token id's are usually "big" ~6.
+      // The biggest token ID as of now is 149.
+      // To avoid fetching https://api.zksync.io/api/v0.2/tokens/<id>
+      // each time to check whether a transfer is an NFT transfer
+      // or not, just an ID size check can be used.
+      // If this becomes an issue later when more tokens are added,
+      // it can always be solved easily.
+      if (tokenId <= 6 || tokenId >= 500) {
+        // Token ID <= 6 all stables
+        if (tokenId === 2 || tokenId === 4) {
+          fee *= 10 ** 12; // USDC and USDT has 6 decimal places
+        }
+        return fee / ETH_USD;
+      }
+      //
+      // If fees are paid with an unknown token id
+      if (isExpensive) {
+        console.log(
+          `Warning: fees paid in unsupported token ID ${tokenId} for ZkSync. Assumed 0.002Ξ TX Fee`
+        );
+        return 0.002;
+      }
+      console.log(
+        `Warning: fees paid in unsupported token ID ${tokenId} for ZkSync. Assumed 0.0002Ξ TX Fee`
+      );
+      return 0.0002;
+    };
+
+    // ZkSync has different types of transactions.
+    // It is not possible (as far as I know) to convert
+    // the ZkSync fee spent to L1 gas.
+    // This is a guess of how much the transaction type
+    // would cost on average if it was sent on L1.
+    //
+    // Native gas calculated by using zkScan's
+    // estimated cost of transfer and interactions.
+    const ZkSyncGasMap = {
+      // nativeGasSpent: 35731,
+      // L1gasSpent: 3573100,
+      //
+      // ChangePubKey L1GasSpent is zero because
+      // it is a requirement to use ZkSync.
+      // The user wouldn't have to perform this
+      // operation if they were on L1.
+      //
+      // Simple wording: Initial cost to create
+      // ZkSync account is not counted as "savings",
+      // but a loss.
+      ChangePubKey: {
+        nativeGasSpent: 35731,
+        L1gasSpent: 0,
+      },
+      Swap: {
+        nativeGasSpent: 2350,
+        L1gasSpent: 160000, // average uniswap swap gas
+      },
+      ETHTransfer: {
+        nativeGasSpent: 1045,
+        L1gasSpent: 21000,
+      },
+      ERC20Transfer: {
+        nativeGasSpent: 1045,
+        L1gasSpent: 65000,
+      },
+      MintNFT: {
+        nativeGasSpent: 2874,
+        L1gasSpent: 150000, // estimated average
+      },
+      // ForcedExit: {
+      //   nativeGasSpent: 37189,
+      //   L1gasSpent: 0,
+      // },
+      // WithdrawNFT: {
+      //   nativeGasSpent: 72390,
+      //   L1gasSpent: 0, // estimated average
+      // },
+      // Withdraw: {
+      //   nativeGasSpent: 72390,
+      //   L1gasSpent: 0,
+      // },
+      // Deposit: {
+      //   nativeGasSpent: 0,
+      //   L1gasSpent: 0,
+      // },
+    };
+
+    const irrelevantTransactions = new Set([
+      "Deposit",
+      "Withdraw",
+      "WithdrawNFT",
+      "ForcedExit",
+    ]);
+
+    let feesPaid = 0;
+    let L1GasPredicted = 0;
+    let nativeGasPredicted = 0;
+    let feesIfOnMainnet = 0;
+    let txCount = 0;
+
+    for (const tx of data.result.list) {
+      const op = tx.op;
+
+      let feeToken = op.feeToken || 0;
+      const txTimestamp = Math.round(new Date(tx.createdAt).getTime() / 1000);
+      const avgDailyGas = averageDailyGas(txTimestamp);
+      let type = op.type;
+
+      if (irrelevantTransactions.has(type)) {
+        txCount++;
+        continue;
+      } else if (
+        type === "Transfer" &&
+        op.from.toLowerCase() === account.address.toLowerCase()
+      ) {
+        //
+        feeToken = feeToken || tx.op.token;
+        type = op.token === 0 ? "ETHTransfer" : "ERC20Transfer";
+        const isBatch = toEther(op.fee) === 0 ? true : false;
+
+        feesPaid += zkSyncFees(feeToken, toEther(op.fee), txTimestamp);
+        // include batch gas
+        nativeGasPredicted += ZkSyncGasMap[type].nativeGasSpent;
+
+        // if not batch transaction
+        if (!isBatch) {
+          L1GasPredicted += toEther(op.fee);
+          feesIfOnMainnet += toEther(
+            ZkSyncGasMap[type].L1gasSpent * avgDailyGas
+          );
+          txCount += 1;
+        }
+        //
+        //
+      } else if (type === "Swap") {
+        //
+        //
+        feesPaid += zkSyncFees(feeToken, toEther(op.fee), txTimestamp);
+        nativeGasPredicted += ZkSyncGasMap[type].nativeGasSpent;
+        L1GasPredicted += ZkSyncGasMap[type].L1gasSpent;
+        feesIfOnMainnet += toEther(ZkSyncGasMap[type].L1gasSpent * avgDailyGas);
+        txCount++;
+        //
+        //
+      } else if (type === "MintNFT") {
+        //
+        //
+        feesPaid += zkSyncFees(feeToken, toEther(op.fee), txTimestamp);
+        nativeGasPredicted += ZkSyncGasMap[type].nativeGasSpent;
+        L1GasPredicted += ZkSyncGasMap[type].L1gasSpent;
+        txCount++;
+        //
+        //
+      } else if (type === "ChangePubKey") {
+        //
+        //
+        feesPaid += zkSyncFees(feeToken, toEther(op.fee), txTimestamp, true);
+        nativeGasPredicted += ZkSyncGasMap[type].nativeGasSpent;
+        L1GasPredicted += ZkSyncGasMap[type].L1gasSpent;
+        txCount++;
+        //
+        //
+      }
+    }
+    return {
+      feesPaid: feesPaid,
+      L1GasPredicted: Math.round(L1GasPredicted),
+      nativeGasPredicted: nativeGasPredicted,
+      feesIfOnMainnet: feesIfOnMainnet,
+      transactionCount: txCount,
+    };
+  };
+
   const getInfo = async () => {
+    //
     //
     const data = {
       ovm: await getOptimismInfo(),
       avm: await getArbitrumInfo(),
+      zkevm: await getZkSyncInfo(),
     };
+    //
+    //
     const ETHUSD = await etherPrice();
     const currentGas = await gasPrice();
 
@@ -426,6 +656,10 @@ const App = () => {
     );
     const avmTimesCheaper = fixFormat(
       data.avm.feesIfOnMainnet / data.avm.feesPaid,
+      2
+    );
+    const zkevmTimesCheaper = fixFormat(
+      data.zkevm.feesIfOnMainnet / data.zkevm.feesPaid,
       2
     );
 
@@ -484,6 +718,24 @@ const App = () => {
           2
         ),
         timesCheaper: isNaN(avmTimesCheaper) ? 1 : avmTimesCheaper,
+      },
+      zksync: {
+        txCount: data.zkevm.transactionCount,
+        gasSpent: data.zkevm.L1GasPredicted,
+        nativeGasSpent: data.zkevm.nativeGasPredicted,
+        L1feesEther: fixFormat(data.zkevm.feesIfOnMainnet, 4),
+        L1feesUSD: fixFormat(data.zkevm.feesIfOnMainnet * ETHUSD, 2),
+        L2feesEther: fixFormat(data.zkevm.feesPaid, 4),
+        L2feesUSD: fixFormat(data.zkevm.feesPaid * ETHUSD, 2),
+        feesSavedEther: fixFormat(
+          data.zkevm.feesIfOnMainnet - data.zkevm.feesPaid,
+          4
+        ),
+        feesSavedUSD: fixFormat(
+          (data.zkevm.feesIfOnMainnet - data.zkevm.feesPaid) * ETHUSD,
+          2
+        ),
+        timesCheaper: isNaN(zkevmTimesCheaper) ? 1 : zkevmTimesCheaper,
       },
     };
   };
@@ -837,17 +1089,17 @@ const App = () => {
             <InfoText
               textColor={"#6e73b8"}
               mainColor={"#4e5395"}
-              txCount={info.arbitrum.txCount}
-              chainName={"Arbitrum"}
-              nativeGasSpent={info.arbitrum.nativeGasSpent}
-              L2feesEther={info.arbitrum.L2feesEther}
-              L2feesUSD={info.arbitrum.L2feesUSD}
-              gasSpent={info.arbitrum.gasSpent}
-              L1feesEther={info.arbitrum.L1feesEther}
-              L1feesUSD={info.arbitrum.L1feesUSD}
-              feesSavedEther={info.arbitrum.feesSavedEther}
-              feesSavedUSD={info.arbitrum.feesSavedUSD}
-              timesCheaper={info.arbitrum.timesCheaper}
+              txCount={info.zksync.txCount}
+              chainName={"ZkSync"}
+              nativeGasSpent={info.zksync.nativeGasSpent}
+              L2feesEther={info.zksync.L2feesEther}
+              L2feesUSD={info.zksync.L2feesUSD}
+              gasSpent={info.zksync.gasSpent}
+              L1feesEther={info.zksync.L1feesEther}
+              L1feesUSD={info.zksync.L1feesUSD}
+              feesSavedEther={info.zksync.feesSavedEther}
+              feesSavedUSD={info.zksync.feesSavedUSD}
+              timesCheaper={info.zksync.timesCheaper}
             />
           ) : null}
         </div>
