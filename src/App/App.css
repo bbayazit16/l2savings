@@ -41,6 +41,15 @@ nav {
   align-items: center;
 }
 
+@-moz-document url-prefix() {
+  .logo {
+    width: 100px;
+  }
+  .left-info div {
+    margin-left: calc(4px + 1.94vw);
+  }
+}
+
 .logo img {
   height: 100%;
 }
