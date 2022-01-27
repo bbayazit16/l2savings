@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 const Dropper = ({ text, names, urls }) => {
   return (
     <div className="dropbutton">
-      <Buttonish text={text} className="dropmenu" />
+      <Buttonish text={text} noWrap={true} className="dropmenu" />
       <div className="dropcontent">
         {names.map((_, index) => {
           return (

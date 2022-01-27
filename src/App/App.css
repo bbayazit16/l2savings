@@ -1,11 +1,10 @@
-.head {
+#main {
   position: absolute;
   top: 0;
   left: 0;
   height: 94%;
   width: 96%;
   margin: 2%;
-  margin-bottom: 4%;
 }
 
 .shockinginfo {

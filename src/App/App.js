@@ -980,7 +980,7 @@ const App = () => {
   }, [account.address]);
 
   return (
-    <div className="head">
+    <div id="main">
       {/* */}
       <nav>
         <div className="left-info">
@@ -1212,37 +1212,39 @@ const App = () => {
           ) : null}
         </div>
       </div>
-      <div className="leftbottom">
-        <div>
-          <p className="disclaimer">
-            Made possible by Etherscan & ZkSync API's.
-          </p>
-          <p className="disclaimer">
-            Data is provided as is, with no guarantee of accuracy. Expect up to
-            10% inaccuracy.
-          </p>
+      <footer>
+        <div className="leftbottom">
+          <div>
+            <p className="disclaimer">
+              Made possible by Etherscan & ZkSync API's.
+            </p>
+            <p className="disclaimer">
+              Data is provided as is, with no guarantee of accuracy. Expect up
+              to 10% inaccuracy.
+            </p>
+          </div>
         </div>
-      </div>
-      <div className="rightbottom">
-        <div className="socials">
-          <Buttonish
-            text={"Github"}
-            isAnchor={true}
-            img={githublogo}
-            href={"https://github.com/bbayazit16/L2Savings"}
-            newTab={true}
-            showCircularBG={true}
-          />
-          <Buttonish
-            text={"Follow Us On Twitter"}
-            isAnchor={true}
-            img={twitterlogo}
-            imgSize={{ height: "36px", width: "28px" }}
-            href={"https://twitter.com/L2Savings"}
-            newTab={true}
-          />
+        <div className="rightbottom">
+          <div className="socials">
+            <Buttonish
+              text={"Github"}
+              isAnchor={true}
+              img={githublogo}
+              href={"https://github.com/bbayazit16/L2Savings"}
+              newTab={true}
+              showCircularBG={true}
+            />
+            <Buttonish
+              text={"Follow Us On Twitter"}
+              isAnchor={true}
+              img={twitterlogo}
+              imgSize={{ height: "36px", width: "28px" }}
+              href={"https://twitter.com/L2Savings"}
+              newTab={true}
+            />
+          </div>
         </div>
-      </div>
+      </footer>
     </div>
   );
 };
