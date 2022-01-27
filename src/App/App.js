@@ -425,37 +425,71 @@ const App = () => {
     // TODO: Add support for 100+ transactions
     // Possible implementation:
     // let latest = "latest", if transaction count > 100 latest = 100 and refetch
-    const response = await fetch(
-      `https://api.zksync.io/api/v0.2/accounts/${account.address}/transactions?from=latest&limit=100&direction=older`
-    );
 
-    const data = await response.json();
+    let from = "latest";
+    const allData = [];
+    let fetchedTxCount = 0;
+    let firstTxDate = 0;
+    let lastTxDate = 0;
+    // supporting maximum 1000 transactions
+    // otherwise loading times will be too much
+    const MAX_SUPPORTED_TRANSACTIONS = 1000;
+    while (fetchedTxCount < MAX_SUPPORTED_TRANSACTIONS) {
+      //
+      //
+      const response = await fetch(
+        `https://api.zksync.io/api/v0.2/accounts/${account.address}/transactions?from=${from}&limit=100&direction=older`
+      );
 
-    if (data.result.list.length === 0) {
-      // No transactions on ZkSync
-      return {
-        feesPaid: 0,
-        L1GasPredicted: 0,
-        nativeGasPredicted: 0,
-        feesIfOnMainnet: 0,
-        transactionCount: 0,
-      };
+      const data = await response.json();
+
+      if (data.result.list.length === 0) {
+        // No transactions on ZkSync
+        return {
+          feesPaid: 0,
+          L1GasPredicted: 0,
+          nativeGasPredicted: 0,
+          feesIfOnMainnet: 0,
+          transactionCount: 0,
+        };
+      }
+
+      // .at(-1) not supported on mobile
+      const lastElementIndex = data.result.list.length - 1;
+      //
+      //
+      firstTxDate =
+        Math.round(
+          new Date(data.result.list[lastElementIndex].createdAt).getTime() /
+            1000
+        ) - 86400; // subtract 1 day to be safe
+      //
+      //
+      //
+      if (lastTxDate === 0) {
+        lastTxDate =
+          Math.round(new Date(data.result.list[0].createdAt).getTime() / 1000) +
+          86400; // add 1 day to be safe
+      }
+      //
+      //
+      allData.push(data.result.list);
+
+      if (data.result.list.length === 100) {
+        from = data.result.list[lastElementIndex].txHash;
+        fetchedTxCount += 100;
+      } else {
+        break;
+      }
     }
 
-    // .at(-1) not supported on mobile
-    const lastElementIndex = data.result.list.length - 1; 
-
-    const firstTxDate =
-      Math.round(new Date(data.result.list[lastElementIndex].createdAt).getTime() / 1000) -
-      86400; // subtract 1 day to be sure
-
     const eth_priceDataResponse = await fetch(
-      `https://poloniex.com/public?command=returnChartData&currencyPair=USDT_ETH&start=${firstTxDate}&period=14400`
+      `https://poloniex.com/public?command=returnChartData&currencyPair=USDT_ETH&start=${firstTxDate}&end=${lastTxDate}&period=14400`
     );
 
     const ETH_RESPONSE_DATA = await eth_priceDataResponse.json();
 
-    // Starting from Wednesday, 31 March 2021 00:00:00, 4 Hourly Data
+    // Starting from Wednesday, First TX Date, 4 Hourly Data
     const ETHUSD_DATA = Object.fromEntries(
       ETH_RESPONSE_DATA.map(obj => [obj.date, obj.close])
     );
@@ -568,12 +602,16 @@ const App = () => {
       // },
     };
 
+    // "Transactions" that won't be taken
+    // into account as a transaction.
     const irrelevantTransactions = new Set([
       "Deposit",
       "Withdraw",
       "WithdrawNFT",
       "ForcedExit",
     ]);
+    //
+    //
 
     let feesPaid = 0;
     let L1GasPredicted = 0;
@@ -581,70 +619,79 @@ const App = () => {
     let feesIfOnMainnet = 0;
     let txCount = 0;
 
-    for (const tx of data.result.list) {
-      const op = tx.op;
-
-      let feeToken = op.feeToken || 0;
-      const txTimestamp = Math.round(new Date(tx.createdAt).getTime() / 1000);
-      const avgDailyGas = averageDailyGas(txTimestamp);
-      let type = op.type;
-
-      if (irrelevantTransactions.has(type)) {
-        txCount++;
-        continue;
-      } else if (
-        type === "Transfer" &&
-        op.from.toLowerCase() === account.address.toLowerCase()
-      ) {
+    for (const data of allData) {
+      //
+      //
+      for (const tx of data) {
         //
-        feeToken = feeToken || tx.op.token;
-        type = op.token === 0 ? "ETHTransfer" : "ERC20Transfer";
-        // The "isBatch" variable may have a misleading name.
-        // isBatch variable eliminates transactions that may
-        // have been included in a batch.
-        const isBatch = toEther(op.fee) === 0 ? true : false;
+        //
+        const op = tx.op;
 
-        feesPaid += zkSyncFees(feeToken, toEther(op.fee), txTimestamp);
-        // include batch gas
-        // if not in batch transaction
-        if (!isBatch) {
+        let feeToken = op.feeToken || 0;
+        const txTimestamp = Math.round(new Date(tx.createdAt).getTime() / 1000);
+        const avgDailyGas = averageDailyGas(txTimestamp);
+        let type = op.type;
+
+        if (irrelevantTransactions.has(type)) {
+          txCount++;
+          continue;
+          //
+        } else if (
+          type === "Transfer" &&
+          op.from.toLowerCase() === account.address.toLowerCase()
+        ) {
+          //
+          feeToken = feeToken || tx.op.token;
+          type = op.token === 0 ? "ETHTransfer" : "ERC20Transfer";
+          // The "isBatch" variable may have a misleading name.
+          // isBatch variable eliminates transactions that may
+          // have been included in a batch.
+          const isBatch = toEther(op.fee) === 0 ? true : false;
+
+          feesPaid += zkSyncFees(feeToken, toEther(op.fee), txTimestamp);
+          // include batch gas
+          // if not in batch transaction
+          if (!isBatch) {
+            nativeGasPredicted += ZkSyncGasMap[type].nativeGasSpent;
+            L1GasPredicted += ZkSyncGasMap[type].L1gasSpent;
+            feesIfOnMainnet += toEther(
+              ZkSyncGasMap[type].L1gasSpent * avgDailyGas
+            );
+            txCount += 1;
+          }
+          //
+          //
+        } else if (type === "Swap") {
+          //
+          //
+          feesPaid += zkSyncFees(feeToken, toEther(op.fee), txTimestamp);
           nativeGasPredicted += ZkSyncGasMap[type].nativeGasSpent;
-          L1GasPredicted += toEther(op.fee);
+          L1GasPredicted += ZkSyncGasMap[type].L1gasSpent;
           feesIfOnMainnet += toEther(
             ZkSyncGasMap[type].L1gasSpent * avgDailyGas
           );
-          txCount += 1;
+          txCount++;
+          //
+          //
+        } else if (type === "MintNFT") {
+          //
+          //
+          feesPaid += zkSyncFees(feeToken, toEther(op.fee), txTimestamp);
+          nativeGasPredicted += ZkSyncGasMap[type].nativeGasSpent;
+          L1GasPredicted += ZkSyncGasMap[type].L1gasSpent;
+          txCount++;
+          //
+          //
+        } else if (type === "ChangePubKey") {
+          //
+          //
+          feesPaid += zkSyncFees(feeToken, toEther(op.fee), txTimestamp, true);
+          nativeGasPredicted += ZkSyncGasMap[type].nativeGasSpent;
+          L1GasPredicted += ZkSyncGasMap[type].L1gasSpent;
+          txCount++;
+          //
+          //
         }
-        //
-        //
-      } else if (type === "Swap") {
-        //
-        //
-        feesPaid += zkSyncFees(feeToken, toEther(op.fee), txTimestamp);
-        nativeGasPredicted += ZkSyncGasMap[type].nativeGasSpent;
-        L1GasPredicted += ZkSyncGasMap[type].L1gasSpent;
-        feesIfOnMainnet += toEther(ZkSyncGasMap[type].L1gasSpent * avgDailyGas);
-        txCount++;
-        //
-        //
-      } else if (type === "MintNFT") {
-        //
-        //
-        feesPaid += zkSyncFees(feeToken, toEther(op.fee), txTimestamp);
-        nativeGasPredicted += ZkSyncGasMap[type].nativeGasSpent;
-        L1GasPredicted += ZkSyncGasMap[type].L1gasSpent;
-        txCount++;
-        //
-        //
-      } else if (type === "ChangePubKey") {
-        //
-        //
-        feesPaid += zkSyncFees(feeToken, toEther(op.fee), txTimestamp, true);
-        nativeGasPredicted += ZkSyncGasMap[type].nativeGasSpent;
-        L1GasPredicted += ZkSyncGasMap[type].L1gasSpent;
-        txCount++;
-        //
-        //
       }
     }
 

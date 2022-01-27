@@ -28,11 +28,11 @@ def clear_csv(csv: pd.DataFrame) -> pd.DataFrame:
 def to_dict(csv: pd.DataFrame) -> dict:
     # csv.to_json() does not return in the
     # required format.
-    # Saves values starting from 2242th row (31 August).
+    # Saves values starting from row 1982 (1 January 2021)
     latest_timestamp: int = int(csv["UnixTimeStamp"].values[-1])
 
-    timestamps: Generator = (int(y) for y in csv["UnixTimeStamp"].values[2224:])
-    prices: Generator = (int(y) for y in csv["Value (Wei)"].values[2224:])
+    timestamps: Generator = (int(y) for y in csv["UnixTimeStamp"].values[1982:])
+    prices: Generator = (int(y) for y in csv["Value (Wei)"].values[1982:])
 
     info_dict: dict = dict(zip(timestamps, prices))
 
