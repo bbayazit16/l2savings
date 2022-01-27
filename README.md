@@ -95,7 +95,7 @@ This leaves us with only one unknown variable, L1 gas price during the time of t
 
 This principle makes it easy to calculate the total L2 transaction fee spent, (l2 gas \* l2 gas price), however makes it hard to estimate how much the transaction would cost if it was sent on Ethereum Mainnet. An Ether transfer typically costs around 420,000 gas, compared to Ethereum's 21,000 gas. Note that because L2 gas prices are low, it is cheaper to transfer Ether with 420,000 gas than 21,000 gas. In this case, gas is not a valid metric to compare transaction costs. Arbgas, compared to Ethereum L1 gas for common contract calls such as approve, transfer, and swap, approximately gives the following esimated formula:
 
-l1 gas = L2Gas / ((L1GasPrice / (100000000000 + L2GasPrice _ 1.45)) _ 12)
+l1 gas = L2Gas / ((L1GasPrice / (100000000000 + L2GasPrice \* 1.45)) \* 12)
 
 Similar to Optimism, each non-zero byte of the RLP encoded transaction costs 16 units of gas and each zero byte of RLP encoded transaction costs 4 gas. However my efforts to formulate an equation with this approach was ill-fated. If you have a better formula, please open an issue. I'd appreciate some help 🙂.
 
@@ -134,6 +134,7 @@ npm i -g serve
 ```
 
 Then run:
+
 ```sh
 serve -s build
 ```
