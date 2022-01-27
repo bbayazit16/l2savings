@@ -431,6 +431,17 @@ const App = () => {
 
     const data = await response.json();
 
+    if (data.result.list.length === 0) {
+      // No transactions on ZkSync
+      return {
+        feesPaid: 0,
+        L1GasPredicted: 0,
+        nativeGasPredicted: 0,
+        feesIfOnMainnet: 0,
+        transactionCount: 0,
+      };
+    }
+
     const firstTxDate =
       Math.round(new Date(data.result.list.at(-1).createdAt).getTime() / 1000) -
       86400; // subtract 1 day to be sure
@@ -926,12 +937,16 @@ const App = () => {
         <div className="left-info">
           <div className="logo">
             <img src={l2savings} alt="L2Savings logo"></img>
-            <p>L2Savings</p>
+            <span>
+              <p>L2Savings</p>
+            </span>
           </div>
           <div className="gasprice-container">
-            <p>
-              L1 Fast Gas: <span>{info.general.L1FastGasPrice}</span> gwei
-            </p>
+            <span className="gasprice">
+              <p>
+                L1 Fast Gas: <span>{info.general.L1FastGasPrice}</span> gwei
+              </p>
+            </span>
           </div>
         </div>
 
@@ -976,6 +991,7 @@ const App = () => {
             <div className="stats">
               <Buttonish
                 text={"Download My Data"}
+                noWrap={true}
                 isAnchor={true}
                 href={"data:text/json;charset=utf-8," + window.downloadData}
                 download={
@@ -988,6 +1004,7 @@ const App = () => {
               />
               <Buttonish
                 text={"Tweet Your Stats"}
+                noWrap={true}
                 isAnchor={true}
                 onClick={() => {
                   setRandomTweet(generateTweet());

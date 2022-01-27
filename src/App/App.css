@@ -24,7 +24,7 @@ nav {
 }
 
 .left-info div {
-  margin-right: 2rem;
+  margin-right: calc(4px + 1.94vw);
 }
 
 .right-info {
@@ -33,20 +33,22 @@ nav {
   width: 50%;
 }
 
-.stats {
-  display: flex;
-}
-
 .logo {
   display: flex;
   height: auto;
   width: auto;
   justify-content: center;
+  align-items: center;
 }
 
 .logo img {
-  max-height: 100%;
-  max-width: auto;
+  height: 100%;
+}
+
+.logo span {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .logo p {
@@ -68,17 +70,30 @@ nav {
 
 .gasprice-container p {
   line-height: 3rem;
-  font-size: large;
   font-weight: normal;
 }
 
-.gasprice-container span {
+.gasprice {
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap;
+  align-content: center;
+  font-size: calc(14px + 0.278vw);
+  justify-content: center;
+}
+
+.gasprice span {
   color: var(--shocking-info);
 }
 
 .walletcontainer {
   display: flex;
-  top: 5%;
+  align-items: center;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
 }
 
 .infocontainer {
@@ -136,4 +151,59 @@ nav {
 
 .socials {
   display: flex;
+}
+
+@media (max-width: 750px) {
+  .right-info {
+    position: absolute;
+    right: 0;
+  }
+
+  .right-info div div,
+  .right-info div a {
+    height: 50%;
+    width: auto;
+  }
+
+  .right-info .buttonishphotocontainer {
+    display: none;
+  }
+}
+
+@media (max-width: 650px) {
+  .chains div {
+    font-size: calc(4px + 1.278vw);
+    text-indent: -10px;
+  }
+
+  .left-info {
+    display: flex;
+    flex-direction: column;
+    max-width: 15%;
+    width: 50%;
+  }
+
+  .left-info div {
+    margin-top: -100px;
+    margin-bottom: -20%;
+  }
+
+  .logo img {
+    display: flex;
+    padding-left: 80%;
+    height: 25%;
+    width: auto;
+  }
+
+  .logo span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .logo p {
+    font-size: x-large;
+    user-select: none;
+    margin-left: auto;
+  }
 }

@@ -26,6 +26,7 @@
 .buttonish p {
   margin-left: 10px;
   margin-right: 5px;
+  font-size: calc(12px + 0.723vw);
 }
 
 .buttonishphotocontainer {
