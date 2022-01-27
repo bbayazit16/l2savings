@@ -188,6 +188,7 @@ const App = () => {
         break;
       case 9:
         tweet = `My L2 transactions have saved me $${info.general.L1feesUSD}, while being as secure and decentralized as Ethereum Mainnet.`;
+        break;
       default:
         //
         break;
