@@ -1642,7 +1642,7 @@ const App = () => {
             className="feessaved hoverable"
             onClick={() => sortByProperty("feeSaved", chosenTxns())}
           >
-            <span>Fees Saved</span>
+            <span>Saved</span>
             <img
               className={"triangle " + (sortOrder.feeSaved ? "flipped" : "")}
               src={triangle}

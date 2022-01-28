@@ -155,6 +155,7 @@ nav {
 .txbox.initial {
   display: flex;
   height: 50px;
+  width: 100%;
   align-items: center;
   border-left: none;
   border-right: none;
@@ -205,15 +206,15 @@ nav {
 }
 
 .txbox.initial .txhash {
-  margin-left: 10%;
+  margin-left: 7%;
 }
 
 .txbox.initial .l2fee {
-  margin-left: 10%;
+  margin-left: 9%;
 }
 
 .txbox.initial .l1fee {
-  margin-left: 8%;
+  margin-left: 6%;
 }
 
 .txbox.initial .feessaved {
@@ -221,7 +222,7 @@ nav {
 }
 
 .txbox.initial .cheapness {
-  margin-left: 3%;
+  margin-left: 2%;
 }
 
 footer {
