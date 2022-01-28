@@ -34,9 +34,19 @@ const App = () => {
   const [showZkSync, setShowZkSync] = useState(false);
   //
 
-  const [optimismTxns, setOptimismTxns] = useState([]);
-  const [arbitrumTxns, setArbitrumTxns] = useState([]);
-  const [zkSyncTxns, setZkSyncTxns] = useState([]);
+  const [optimismTxns, setOptimismTxns] = useState({ actual: [], display: [] });
+  const [arbitrumTxns, setArbitrumTxns] = useState({ actual: [], display: [] });
+  const [zkSyncTxns, setZkSyncTxns] = useState({ actual: [], display: [] });
+  const [allTxns, setAllTxns] = useState({ actual: [], display: [] });
+  //
+  const [sortOrder, setSortOrder] = useState({
+    l2: false,
+    txHash: false,
+    feesPaid: false,
+    feeIfOnL1: false,
+    feeSaved: false,
+    savingsMultiplier: false,
+  });
 
   const walletContainerRef = useRef();
 
@@ -415,8 +425,9 @@ const App = () => {
       }
     }
 
+    const unedited = txs.map(obj => JSON.parse(JSON.stringify(obj)));
     decimalizeTx(txs);
-    setOptimismTxns(txs);
+    setOptimismTxns({ actual: unedited, display: txs });
 
     return {
       feesPaid: toEther(Math.round(feesPaid)),
@@ -473,7 +484,6 @@ const App = () => {
         seenTxs.push(tx.hash);
         //
         if (tx.from.toLowerCase() === account.address.toLowerCase()) {
-
           const L2Gas = parseInt(tx.gasUsed);
 
           // Do not count L2 Deposits as
@@ -523,8 +533,9 @@ const App = () => {
       }
     }
 
+    const unedited = txs.map(obj => JSON.parse(JSON.stringify(obj)));
     decimalizeTx(txs);
-    setArbitrumTxns(txs);
+    setArbitrumTxns({ actual: unedited, display: txs });
 
     return {
       feesPaid: toEther(Math.round(feesPaid)),
@@ -930,8 +941,9 @@ const App = () => {
       }
     }
 
+    const unedited = txs.map(obj => JSON.parse(JSON.stringify(obj)));
     decimalizeTx(txs);
-    setZkSyncTxns(txs);
+    setZkSyncTxns({ actual: unedited, display: txs });
 
     return {
       feesPaid: feesPaid,
@@ -1062,6 +1074,62 @@ const App = () => {
     };
   };
 
+  const chosenTxns = () => {
+    let chosen;
+    if (showAllChains) chosen = [allTxns, setAllTxns];
+    else if (showOptimism) chosen = [optimismTxns, setOptimismTxns];
+    else if (showArbitrum) chosen = [arbitrumTxns, setArbitrumTxns];
+    else if (showZkSync) chosen = [zkSyncTxns, setZkSyncTxns];
+    return chosen;
+  };
+
+  const sortByProperty = (property, [txObjects, setTxObjects]) => {
+    //
+    // if order is true, sort in descending order
+    //
+    const _sortOrder = { ...sortOrder };
+    const order = !_sortOrder[property];
+    _sortOrder[property] = order;
+    setSortOrder(_sortOrder);
+
+    const actualCopy = txObjects.actual.map(obj =>
+      JSON.parse(JSON.stringify(obj))
+    );
+    const displayCopy = txObjects.display.map(obj =>
+      JSON.parse(JSON.stringify(obj))
+    );
+
+    const copy = [];
+    for (let i = 0; i < actualCopy.length; i++) {
+      copy.push({ actual: actualCopy[i], display: displayCopy[i] });
+    }
+
+    copy.sort((a, b) => {
+      if (typeof a === "string") {
+        if (order) {
+          // descending
+          return a.actual.l2.localeCompare(b.actual.l2);
+        } else {
+          // ascending
+          return !a.actual.l2.localeCompare(b.actual.l2);
+        }
+      }
+      if (a.actual[property] < b.actual[property]) {
+        return order ? 1 : -1;
+      } else if (a.actual[property] > b.actual[property]) {
+        return order ? -1 : 1;
+      }
+      return 0;
+    });
+
+    for (let i = 0; i < copy.length; i++) {
+      actualCopy[i] = copy[i].actual;
+      displayCopy[i] = copy[i].display;
+    }
+
+    setTxObjects({ actual: actualCopy, display: displayCopy });
+  };
+
   // Get ENS address and ENS avatar
   const fetchMetadata = async () => {
     //
@@ -1173,6 +1241,10 @@ const App = () => {
         setInfo(emptyInfo());
         if (accounts.length === 0) {
           localStorage.removeItem("connectionType");
+          setOptimismTxns({ actual: [], display: [] });
+          setArbitrumTxns({ actual: [], display: [] });
+          setZkSyncTxns({ actual: [], display: [] });
+          setAllTxns({ actual: [], display: [] });
         } else {
           connectWallet(localStorage.getItem("connectionType"));
         }
@@ -1190,9 +1262,15 @@ const App = () => {
           // restore injected provider
           window.ethereum = window.oldEthereum;
         }
+        setOptimismTxns({ actual: [], display: [] });
+        setArbitrumTxns({ actual: [], display: [] });
+        setZkSyncTxns({ actual: [], display: [] });
+        setAllTxns({ actual: [], display: [] });
       });
     }
-  });
+    // Avoid spamming event listeners
+    // eslint-disable-next-line
+  }, [window.ethereum]);
 
   // On App load
   useEffect(() => {
@@ -1215,6 +1293,27 @@ const App = () => {
     }
     // eslint-disable-next-line
   }, [account.address]);
+
+  // On txns fetched
+  useEffect(() => {
+    // ZkSync is fetched last in the getInfo function
+    // it should be sufficient to check for the length
+    // to determmine if everything was fetched.
+    if (zkSyncTxns.display.length !== 0) {
+      setAllTxns({
+        actual: [].concat(
+          optimismTxns.actual,
+          arbitrumTxns.actual,
+          zkSyncTxns.actual
+        ),
+        display: [].concat(
+          optimismTxns.display,
+          arbitrumTxns.display,
+          zkSyncTxns.display
+        ),
+      });
+    }
+  }, [optimismTxns, arbitrumTxns, zkSyncTxns]);
 
   return (
     <div className="main">
@@ -1485,35 +1584,61 @@ const App = () => {
 
       <div className="tx-details">
         <div className="txbox initial">
-          <div className="l2name hoverable">L2</div>
-          <div className="txhash hoverable">Tx Hash</div>
-          <div className="l2fee hoverable">L2 Fee</div>
-          <div className="l1fee hoverable">L1 Fee</div>{" "}
+          <div
+            className="l2name hoverable"
+            onClick={() => sortByProperty("l2", chosenTxns())}
+          >
+            L2
+          </div>
+          <div
+            className="txhash hoverable"
+            onClick={() => sortByProperty("txHash", chosenTxns())}
+          >
+            Tx Hash
+          </div>
+          <div
+            className="l2fee hoverable"
+            onClick={() => sortByProperty("feesPaid", chosenTxns())}
+          >
+            L2 Fee
+          </div>
+          <div
+            className="l1fee hoverable"
+            onClick={() => sortByProperty("feeIfOnL1", chosenTxns())}
+          >
+            L1 Fee
+          </div>
           {/*Estiated Fee During the Time of Transaction*/}
-          <div className="feessaved hoverable">Fees Saved</div>
-          <div className="cheapness hoverable">Times Cheaper</div>
+          <div
+            className="feessaved hoverable"
+            onClick={() => sortByProperty("feeSaved", chosenTxns())}
+          >
+            Fees Saved
+          </div>
+          <div
+            className="cheapness hoverable"
+            onClick={() => sortByProperty("savingsMultiplier", chosenTxns())}
+          >
+            Times Cheaper
+          </div>
         </div>
         {showAllChains && info.txCount !== "..."
-          ? []
-              .concat(optimismTxns, arbitrumTxns, zkSyncTxns)
-              .map((tx, index) => {
-                return (
-                  <TxBox img={chainToAsset(tx.l2)} txObj={tx} key={index} />
-                );
-              })
+          ? allTxns.display.map((tx, index) => {
+              return <TxBox img={chainToAsset(tx.l2)} txObj={tx} key={index} />;
+            })
           : null}
         {showOptimism && info.txCount !== "..."
-          ? optimismTxns.map((tx, index) => {
+          ? optimismTxns.display.map((tx, index) => {
               return <TxBox img={optimism} txObj={tx} key={index} />;
             })
           : null}
         {showArbitrum && info.txCount !== "..."
-          ? arbitrumTxns.map((tx, index) => {
+          ? arbitrumTxns.display.map((tx, index) => {
               return <TxBox img={arbitrum} txObj={tx} key={index} />;
             })
           : null}
         {showZkSync && info.txCount !== "..."
-          ? zkSyncTxns.map((tx, index) => {
+          ? zkSyncTxns.display.map((tx, index) => {
               return <TxBox img={zksync} txObj={tx} key={index} />;
             })
           : null}
