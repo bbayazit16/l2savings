@@ -1305,11 +1305,8 @@ const App = () => {
     // eslint-disable-next-line
   }, [account.address]);
 
-  // On txns fetched
+  // On info ready
   useEffect(() => {
-    // ZkSync is fetched last in the getInfo function
-    // it should be sufficient to check for the length
-    // to determmine if everything was fetched.
     if (zkSyncTxns.display.length !== 0) {
       setAllTxns({
         actual: [].concat(
@@ -1324,7 +1321,8 @@ const App = () => {
         ),
       });
     }
-  }, [optimismTxns, arbitrumTxns, zkSyncTxns]);
+    // eslint-disable-next-line
+  }, [info]);
 
   return (
     <div className="main">
