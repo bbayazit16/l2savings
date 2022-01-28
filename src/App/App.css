@@ -158,7 +158,8 @@ nav {
   align-items: center;
   border-left: none;
   border-right: none;
-  font-size: calc(1vw + 8px);
+  font-size: calc(1vw + 10px);
+  min-height: 12.5%;
 }
 
 .txbox.initial div {
@@ -169,8 +170,34 @@ nav {
   font-weight: normal;
 }
 
+.tx-details-main {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  overflow-y: scroll;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.sort-triangle {
+  width: 10%;
+  height: auto;
+}
+
 .hoverable {
   cursor: pointer;
+}
+
+.triangle {
+  position: absolute;
+  margin-top: 10px;
+  height: 1%;
+  width: auto;
+}
+
+.flipped {
+  transform: scale(1, -1);
 }
 
 .txbox.initial .l2name {

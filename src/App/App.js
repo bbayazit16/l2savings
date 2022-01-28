@@ -19,6 +19,7 @@ import metamasklogo from "../Assets/metamasklogo.svg";
 import walletconnectlogo from "../Assets/walletconnectlogo.svg";
 import githublogo from "../Assets/githublogo.png";
 import zksync from "../Assets/zksync.svg";
+import triangle from "../Assets/triangle.svg";
 //
 
 // TODO: Add individual tx informations to download data
@@ -641,7 +642,7 @@ const App = () => {
       // if id = 0, it's an ether transfer
       // If the id is in token ID's, it's a token
       // otherwise it's an nft.
-      // NFT token id's are usually "big" ~6.
+      // NFT token id's are usually "big" ~6 digits.
       // The biggest token ID as of now is 149.
       // To avoid fetching https://api.zksync.io/api/v0.2/tokens/<id>
       // each time to check whether a transfer is an NFT transfer
@@ -656,7 +657,8 @@ const App = () => {
         return fee / ETH_USD;
       }
       //
-      // If fees are paid with an unknown token id
+      // If fees are paid with an unknown token id, an estimate
+      // is returned
       if (isExpensive) {
         console.log(
           `Warning: fees paid in unsupported token ID ${tokenId} for ZkSync. Assumed 0.002Ξ TX Fee`
@@ -678,21 +680,27 @@ const App = () => {
     // Native gas calculated by using zkScan's
     // estimated cost of transfer and interactions.
     const ZkSyncGasMap = {
+      //
+      // ChangePubKey is not accounted as a
+      // transaction for now. Don't get confused
+      // with the comments below
+      //
+      //
       // nativeGasSpent: 35731,
       // L1gasSpent: 3573100,
-      //
+
       // ChangePubKey L1GasSpent is zero because
       // it is a requirement to use ZkSync.
       // The user wouldn't have to perform this
       // operation if they were on L1.
-      //
+
       // Simple wording: Initial cost to create
       // ZkSync account is not counted as "savings",
       // but a loss.
-      ChangePubKey: {
-        nativeGasSpent: 35731,
-        L1gasSpent: 0,
-      },
+      // ChangePubKey: {
+      //   nativeGasSpent: 35731,
+      //   L1gasSpent: 0,
+      // },
       Swap: {
         nativeGasSpent: 2350,
         L1gasSpent: 160000, // average uniswap swap gas
@@ -1588,60 +1596,96 @@ const App = () => {
             className="l2name hoverable"
             onClick={() => sortByProperty("l2", chosenTxns())}
           >
-            L2
+            <span>L2</span>
+            <img
+              className={"triangle " + (sortOrder.l2 ? "flipped" : "")}
+              src={triangle}
+              alt="triangle"
+            ></img>
           </div>
           <div
             className="txhash hoverable"
             onClick={() => sortByProperty("txHash", chosenTxns())}
           >
-            Tx Hash
+            <span>Tx Hash</span>
+            <img
+              className={"triangle " + (sortOrder.txHash ? "flipped" : "")}
+              src={triangle}
+              alt="triangle"
+            ></img>
           </div>
           <div
             className="l2fee hoverable"
             onClick={() => sortByProperty("feesPaid", chosenTxns())}
           >
-            L2 Fee
+            <span>L2 Fee</span>
+            <img
+              className={"triangle " + (sortOrder.feesPaid ? "flipped" : "")}
+              src={triangle}
+              alt="triangle"
+            ></img>
           </div>
           <div
             className="l1fee hoverable"
             onClick={() => sortByProperty("feeIfOnL1", chosenTxns())}
           >
-            L1 Fee
+            <span>L1 Fee</span>
+            <img
+              className={"triangle " + (sortOrder.feeIfOnL1 ? "flipped" : "")}
+              src={triangle}
+              alt="triangle"
+            ></img>
           </div>
           {/*Estiated Fee During the Time of Transaction*/}
           <div
             className="feessaved hoverable"
             onClick={() => sortByProperty("feeSaved", chosenTxns())}
           >
-            Fees Saved
+            <span>Fees Saved</span>
+            <img
+              className={"triangle " + (sortOrder.feeSaved ? "flipped" : "")}
+              src={triangle}
+              alt="triangle"
+            ></img>
           </div>
           <div
             className="cheapness hoverable"
             onClick={() => sortByProperty("savingsMultiplier", chosenTxns())}
           >
-            Times Cheaper
+            <span>Times Cheaper</span>
+            <img
+              className={
+                "triangle " + (sortOrder.savingsMultiplier ? "flipped" : "")
+              }
+              src={triangle}
+              alt="triangle"
+            ></img>
           </div>
         </div>
-        {showAllChains && info.txCount !== "..."
-          ? allTxns.display.map((tx, index) => {
-              return <TxBox img={chainToAsset(tx.l2)} txObj={tx} key={index} />;
-            })
-          : null}
-        {showOptimism && info.txCount !== "..."
-          ? optimismTxns.display.map((tx, index) => {
-              return <TxBox img={optimism} txObj={tx} key={index} />;
-            })
-          : null}
-        {showArbitrum && info.txCount !== "..."
-          ? arbitrumTxns.display.map((tx, index) => {
-              return <TxBox img={arbitrum} txObj={tx} key={index} />;
-            })
-          : null}
-        {showZkSync && info.txCount !== "..."
-          ? zkSyncTxns.display.map((tx, index) => {
-              return <TxBox img={zksync} txObj={tx} key={index} />;
-            })
-          : null}
+        <div className="tx-details-main">
+          {showAllChains && info.txCount !== "..."
+            ? allTxns.display.map((tx, index) => {
+                return (
+                  <TxBox img={chainToAsset(tx.l2)} txObj={tx} key={index} />
+                );
+              })
+            : null}
+          {showOptimism && info.txCount !== "..."
+            ? optimismTxns.display.map((tx, index) => {
+                return <TxBox img={optimism} txObj={tx} key={index} />;
+              })
+            : null}
+          {showArbitrum && info.txCount !== "..."
+            ? arbitrumTxns.display.map((tx, index) => {
+                return <TxBox img={arbitrum} txObj={tx} key={index} />;
+              })
+            : null}
+          {showZkSync && info.txCount !== "..."
+            ? zkSyncTxns.display.map((tx, index) => {
+                return <TxBox img={zksync} txObj={tx} key={index} />;
+              })
+            : null}
+        </div>
       </div>
     </div>
   );

@@ -17,11 +17,12 @@
 
 body {
   background-color: var(--background-color);
-  background: rgb(16, 29, 51);
+  background: rgb(10, 24, 48);
   background: radial-gradient(
     circle,
-    rgba(16, 29, 51, 1) 10%,
-    rgba(26, 21, 54, 1) 90%
+    rgba(10, 24, 48, 1) 15%,
+    rgba(16, 29, 51, 1) 50%,
+    rgba(10, 24, 48, 1) 85%
   );
   /* credits to https://cssgradient.io/ for the awesome gradient maker! */
 }
