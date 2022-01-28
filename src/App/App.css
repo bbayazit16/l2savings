@@ -152,6 +152,47 @@ nav {
   overflow-y: scroll;
 }
 
+.txbox.initial {
+  display: flex;
+  align-items: center;
+  border-left: none;
+  border-right: none;
+  font-size: calc(1vw + 8px);
+}
+
+.txbox.initial div {
+  white-space: nowrap;
+  font-weight: normal;
+}
+
+.hoverable {
+  cursor: pointer;
+}
+
+.txbox.initial .l2name {
+  margin-left: 6%;
+}
+
+.txbox.initial .txhash {
+  margin-left: 10%;
+}
+
+.txbox.initial .l2fee {
+  margin-left: 10%;
+}
+
+.txbox.initial .l1fee {
+  margin-left: 8%;
+}
+
+.txbox.initial .feessaved {
+  margin-left: 6%;
+}
+
+.txbox.initial .cheapness {
+  margin-left: 3%;
+}
+
 footer {
   position: fixed;
   display: block;

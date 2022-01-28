@@ -8,6 +8,7 @@ small {
   margin-left: 0;
   width: calc(100% - 4px);
   border: 2px solid var(--border-color);
+  border-top: none;
   background-color: var(--background-color);
   justify-content: space-evenly;
 }

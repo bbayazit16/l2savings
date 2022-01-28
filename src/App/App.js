@@ -1418,9 +1418,20 @@ const App = () => {
       </footer>
 
       <div className="tx-details">
-        {zkSyncTxs.map((tx, index) => {
-          return <TxBox img={zksync} txObj={tx} key={index} />;
-        })}
+        <div className="txbox initial">
+          <div className="l2name hoverable">L2</div>
+          <div className="txhash hoverable">Tx Hash</div>
+          <div className="l2fee hoverable">L2 Fee</div>
+          <div className="l1fee hoverable">L1 Fee</div>{" "}
+          {/*Estiated Fee During the Time of Transaction*/}
+          <div className="feessaved hoverable">Fees Saved</div>
+          <div className="cheapness hoverable">Times Cheaper</div>
+        </div>
+        {showZkSync && info.txCount !== "..."
+          ? zkSyncTxs.map((tx, index) => {
+              return <TxBox img={zksync} txObj={tx} key={index} />;
+            })
+          : null}
       </div>
     </div>
   );

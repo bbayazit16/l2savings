@@ -14,7 +14,7 @@ const TxBox = ({ img, txObj }) => {
   return (
     <div className="txbox">
       <div className="txbox-img-container centered">
-        <img src={img} alt="TxBox Chain Icon"></img>
+        <img src={img} alt="TxBox L2 Icon"></img>
       </div>
       <div className="tx-hash centered">
         <a href={txObj.txBaseURI + txHash} target="_blank" rel="noreferrer">
