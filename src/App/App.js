@@ -47,6 +47,7 @@ const App = () => {
     feeIfOnL1: false,
     feeSaved: false,
     savingsMultiplier: false,
+    last: "",
   });
 
   const walletContainerRef = useRef();
@@ -1097,6 +1098,8 @@ const App = () => {
     //
     const _sortOrder = { ...sortOrder };
     const order = !_sortOrder[property];
+    _sortOrder[_sortOrder.last] = false;
+    _sortOrder.last = property;
     _sortOrder[property] = order;
     setSortOrder(_sortOrder);
 
