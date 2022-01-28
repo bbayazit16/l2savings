@@ -34,7 +34,9 @@ const App = () => {
   const [showZkSync, setShowZkSync] = useState(false);
   //
 
-  const [zkSyncTxs, setZkSyncTxs] = useState([]);
+  const [optimismTxns, setOptimismTxns] = useState([]);
+  const [arbitrumTxns, setArbitrumTxns] = useState([]);
+  const [zkSyncTxns, setZkSyncTxns] = useState([]);
 
   const walletContainerRef = useRef();
 
@@ -104,6 +106,19 @@ const App = () => {
 
   const [info, setInfo] = useState(emptyInfo());
 
+  const chainToAsset = chainName => {
+    switch (chainName) {
+      case "optimism":
+        return optimism;
+      case "arbitrum":
+        return arbitrum;
+      case "zksync":
+        return zksync;
+      default:
+        return;
+    }
+  };
+
   // 0xAAAA...bbbb
   const shorten = addr => {
     return addr.substring(0, 6) + "..." + addr.substring(addr.length - 4);
@@ -123,7 +138,7 @@ const App = () => {
   };
 
   const decimalizeTx = arr => {
-    const irrelevantFields = new Set(["txHash", "txBaseURI"]);
+    const irrelevantFields = new Set(["txHash", "txBaseURI", "l2"]);
     for (const obj of arr) {
       for (let key in obj) {
         if (!irrelevantFields.has(key)) {
@@ -333,6 +348,7 @@ const App = () => {
     let gasUsed = 0;
     let feesIfOnMainnet = 0;
     let txCount = 0;
+    const txs = [];
     // If an address has sent a transaction
     // to itself, Etherscan api returns
     // the tx twice.
@@ -372,21 +388,40 @@ const App = () => {
           const L1GasPrice = averageDailyGas(parseInt(tx.timeStamp));
           const feeScalar = getOVML1FeeScalar(tx.blockNumber);
 
-          feesPaid +=
+          const feePaid =
             L2GasUsed * L2GasPrice + L1GasLimit * L1GasPrice * feeScalar;
+          const feeIfOnMainnet = L2GasUsed * L1GasPrice;
+
+          feesPaid += feePaid;
           gasUsed += parseInt(tx.gasUsed);
           // Optimism is Ethereum equivalent. Ethereum Mainnet gas
           // spent would be approximately the same.
-          feesIfOnMainnet += L2GasUsed * L1GasPrice;
+          feesIfOnMainnet += feeIfOnMainnet;
           txCount++;
+
+          const feePaidEther = toEther(Math.round(feePaid));
+          const feesIfOnMainnetEther = toEther(Math.round(feeIfOnMainnet));
+
+          txs.push({
+            l2: "optimism",
+            txBaseURI: "https://optimistic.etherscan.io/tx/",
+            txHash: tx.hash,
+            feesPaid: feePaidEther,
+            feeIfOnL1: feesIfOnMainnetEther,
+            feeSaved: feesIfOnMainnetEther - feePaidEther,
+            savingsMultiplier: feesIfOnMainnetEther / feePaidEther,
+          });
         }
       }
     }
 
+    decimalizeTx(txs);
+    setOptimismTxns(txs);
+
     return {
-      feesPaid: toEther(feesPaid),
+      feesPaid: toEther(Math.round(feesPaid)),
       gasUsed: gasUsed,
-      feesIfOnMainnet: toEther(feesIfOnMainnet),
+      feesIfOnMainnet: toEther(Math.round(feesIfOnMainnet)),
       transactionCount: txCount,
     };
     //
@@ -418,6 +453,7 @@ const App = () => {
     let gasUsed = 0;
     let feesIfOnMainnet = 0;
     let txCount = 0;
+    const txs = [];
     // If an address has sent a transaction
     // to itself, Etherscan api returns
     // the tx twice.
@@ -437,10 +473,18 @@ const App = () => {
         seenTxs.push(tx.hash);
         //
         if (tx.from.toLowerCase() === account.address.toLowerCase()) {
+
+          const L2Gas = parseInt(tx.gasUsed);
+
+          // Do not count L2 Deposits as
+          // transactions
+          if (L2Gas === 0) {
+            continue;
+          }
+
           // Arbiscan api returns the gas price bid and not the
           // actual gas price paid. On average actual gas price
           // paid is 0.27 gwei less. (from my observations)
-          const L2Gas = parseInt(tx.gasUsed);
           const L2GasPrice = parseInt(tx.gasPrice) - 270000000;
           const L1GasPrice = avmL1GasScalar(L2GasPrice, tx.timeStamp);
 
@@ -454,20 +498,39 @@ const App = () => {
             L2Gas / ((L1GasPrice / (100000000000 + L2GasPrice * 1.45)) * 12)
           );
 
+          // fee if on mainnet
+          const fiom = gasIfOnMainnet * L1GasPrice;
+
           feesPaid += feePaid;
           arbgasUsed += L2Gas;
           gasUsed += gasIfOnMainnet;
-          feesIfOnMainnet += gasIfOnMainnet * L1GasPrice;
+          feesIfOnMainnet += fiom;
           txCount++;
+
+          const feePaidEther = toEther(Math.round(feePaid));
+          const feeIfOnMainnetEther = toEther(Math.round(fiom));
+
+          txs.push({
+            l2: "arbitrum",
+            txBaseURI: "https://arbiscan.io/tx/",
+            txHash: tx.hash,
+            feesPaid: feePaidEther,
+            feeIfOnL1: feeIfOnMainnetEther,
+            feeSaved: feeIfOnMainnetEther - feePaidEther,
+            savingsMultiplier: feeIfOnMainnetEther / feePaidEther,
+          });
         }
       }
     }
 
+    decimalizeTx(txs);
+    setArbitrumTxns(txs);
+
     return {
-      feesPaid: toEther(feesPaid),
+      feesPaid: toEther(Math.round(feesPaid)),
       gasUsed: gasUsed,
       arbgasUsed: arbgasUsed,
-      feesIfOnMainnet: toEther(feesIfOnMainnet),
+      feesIfOnMainnet: toEther(Math.round(feesIfOnMainnet)),
       transactionCount: txCount,
     };
   };
@@ -475,10 +538,8 @@ const App = () => {
   // ZkSync has "types" of transactions
   // Each type of transaction returns different information.
   const getZkSyncInfo = async () => {
-    // TODO: Add support for 100+ transactions
-    // Possible implementation:
-    // let latest = "latest", if transaction count > 100 latest = 100 and refetch
-
+    //
+    //
     let from = "latest";
     const allData = [];
     let fetchedTxCount = 0;
@@ -740,6 +801,7 @@ const App = () => {
               //
               //
               txs.push({
+                l2: "zksync",
                 txBaseURI: "https://zkscan.io/explorer/transactions/",
                 txHash: tx.txHash,
                 feesPaid: fp,
@@ -768,6 +830,7 @@ const App = () => {
           //
           //
           txs.push({
+            l2: "zksync",
             txBaseURI: "https://zkscan.io/explorer/transactions/",
             txHash: tx.txHash,
             feesPaid: fp,
@@ -794,6 +857,7 @@ const App = () => {
           //
           //
           txs.push({
+            l2: "zksync",
             txBaseURI: "https://zkscan.io/explorer/transactions/",
             txHash: tx.txHash,
             feesPaid: fp,
@@ -819,6 +883,7 @@ const App = () => {
           //
           //
           txs.push({
+            l2: "zksync",
             txBaseURI: "https://zkscan.io/explorer/transactions/",
             txHash: tx.txHash,
             feesPaid: fp,
@@ -851,6 +916,7 @@ const App = () => {
         // //
         // //
         // txs.push({
+        //   l2: "zksync",
         //   txBaseURI: "https://zkscan.io/explorer/transactions/",
         //   txHash: tx.txHash,
         //   feesPaid: fp,
@@ -865,7 +931,7 @@ const App = () => {
     }
 
     decimalizeTx(txs);
-    setZkSyncTxs(txs);
+    setZkSyncTxns(txs);
 
     return {
       feesPaid: feesPaid,
@@ -1427,8 +1493,27 @@ const App = () => {
           <div className="feessaved hoverable">Fees Saved</div>
           <div className="cheapness hoverable">Times Cheaper</div>
         </div>
+        {showAllChains && info.txCount !== "..."
+          ? []
+              .concat(optimismTxns, arbitrumTxns, zkSyncTxns)
+              .map((tx, index) => {
+                return (
+                  <TxBox img={chainToAsset(tx.l2)} txObj={tx} key={index} />
+                );
+              })
+          : null}
+        {showOptimism && info.txCount !== "..."
+          ? optimismTxns.map((tx, index) => {
+              return <TxBox img={optimism} txObj={tx} key={index} />;
+            })
+          : null}
+        {showArbitrum && info.txCount !== "..."
+          ? arbitrumTxns.map((tx, index) => {
+              return <TxBox img={arbitrum} txObj={tx} key={index} />;
+            })
+          : null}
         {showZkSync && info.txCount !== "..."
-          ? zkSyncTxs.map((tx, index) => {
+          ? zkSyncTxns.map((tx, index) => {
               return <TxBox img={zksync} txObj={tx} key={index} />;
             })
           : null}

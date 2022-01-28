@@ -154,6 +154,7 @@ nav {
 
 .txbox.initial {
   display: flex;
+  height: 50px;
   align-items: center;
   border-left: none;
   border-right: none;
@@ -161,6 +162,9 @@ nav {
 }
 
 .txbox.initial div {
+  height: 40px;
+  justify-content: center;
+  align-items: center;
   white-space: nowrap;
   font-weight: normal;
 }
