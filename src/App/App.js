@@ -42,7 +42,7 @@ const App = () => {
   //
   const [sortOrder, setSortOrder] = useState({
     l2: false,
-    txHash: false,
+    timestamp: false,
     feesPaid: false,
     feeIfOnL1: false,
     feeSaved: false,
@@ -333,7 +333,9 @@ const App = () => {
   // 100 times less than the L1 gas price.
   // So L1 gas is 100 * L2 gas.
   // Note that this might be changed as
-  // Arbitrum is upgraded.
+  // Arbitrum is upgraded. That's why
+  // blocknum is kept here as an unused
+  // property.
   const avmL1GasScalar = (L2GasPrice, blockNum) => {
     return L2GasPrice * 100;
   };
@@ -418,6 +420,7 @@ const App = () => {
             l2: "optimism",
             txBaseURI: "https://optimistic.etherscan.io/tx/",
             txHash: tx.hash,
+            timestamp: parseInt(tx.timeStamp),
             feesPaid: feePaidEther,
             feeIfOnL1: feesIfOnMainnetEther,
             feeSaved: feesIfOnMainnetEther - feePaidEther,
@@ -498,7 +501,7 @@ const App = () => {
           // actual gas price paid. On average actual gas price
           // paid is 0.27 gwei less. (from my observations)
           const L2GasPrice = parseInt(tx.gasPrice) - 270000000;
-          const L1GasPrice = avmL1GasScalar(L2GasPrice, tx.timeStamp);
+          const L1GasPrice = avmL1GasScalar(L2GasPrice, parseInt(tx.timeStamp));
 
           const feePaid = L2GasPrice * L2Gas;
 
@@ -526,6 +529,7 @@ const App = () => {
             l2: "arbitrum",
             txBaseURI: "https://arbiscan.io/tx/",
             txHash: tx.hash,
+            timestamp: parseInt(tx.timeStamp),
             feesPaid: feePaidEther,
             feeIfOnL1: feeIfOnMainnetEther,
             feeSaved: feeIfOnMainnetEther - feePaidEther,
@@ -873,6 +877,7 @@ const App = () => {
                 l2: "zksync",
                 txBaseURI: "https://zkscan.io/explorer/transactions/",
                 txHash: tx.txHash,
+                timestamp: txTimestamp,
                 feesPaid: fp,
                 feeIfOnL1: fiom,
                 feeSaved: fiom - fp,
@@ -902,6 +907,7 @@ const App = () => {
             l2: "zksync",
             txBaseURI: "https://zkscan.io/explorer/transactions/",
             txHash: tx.txHash,
+            timestamp: txTimestamp,
             feesPaid: fp,
             feeIfOnL1: fiom,
             feeSaved: fiom - fp,
@@ -929,6 +935,7 @@ const App = () => {
             l2: "zksync",
             txBaseURI: "https://zkscan.io/explorer/transactions/",
             txHash: tx.txHash,
+            timestamp: txTimestamp,
             feesPaid: fp,
             feeIfOnL1: fiom,
             feeSaved: fiom - fp,
@@ -955,6 +962,7 @@ const App = () => {
             l2: "zksync",
             txBaseURI: "https://zkscan.io/explorer/transactions/",
             txHash: tx.txHash,
+            timestamp: txTimestamp,
             feesPaid: fp,
             feeIfOnL1: fiom,
             feeSaved: fiom - fp,
@@ -988,6 +996,7 @@ const App = () => {
         //   l2: "zksync",
         //   txBaseURI: "https://zkscan.io/explorer/transactions/",
         //   txHash: tx.txHash,
+        //   timestamp: txTimestamp,
         //   feesPaid: fp,
         //   feeIfOnL1: fiom,
         //   feeSaved: fiom - fp,
@@ -1669,11 +1678,11 @@ const App = () => {
           </div>
           <div
             className="txhash hoverable"
-            onClick={() => sortByProperty("txHash", chosenTxns())}
+            onClick={() => sortByProperty("timestamp", chosenTxns())}
           >
             <span>Tx Hash</span>
             <img
-              className={"triangle " + (sortOrder.txHash ? "flipped" : "")}
+              className={"triangle " + (sortOrder.timestamp ? "flipped" : "")}
               src={triangle}
               alt="triangle"
             ></img>
@@ -1700,7 +1709,7 @@ const App = () => {
               alt="triangle"
             ></img>
           </div>
-          {/*Estiated Fee During the Time of Transaction*/}
+          {/*Estiated Fee on L1 During the Time of Transaction*/}
           <div
             className="feessaved hoverable"
             onClick={() => sortByProperty("feeSaved", chosenTxns())}
