@@ -5,7 +5,7 @@
   height: 94%;
   width: 96%;
   margin: 2%;
-  padding-bottom: 25%;
+  padding-bottom: 700px;
 }
 
 .shockinginfo {
@@ -112,6 +112,7 @@ nav {
   margin: auto;
   margin-top: 5%;
   height: 55%;
+  min-height: 20%;
   width: 50%;
   text-align: justify;
   font-size: 28px;
@@ -137,19 +138,46 @@ nav {
   cursor: default;
 }
 
+.tx-details-info {
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  width: 50%;
+  min-height: 20%;
+  margin-top: 1%;
+  margin-bottom: 1%;
+}
+
+.tx-details-info span {
+  text-indent: 2%;
+  font-size: 3vw;
+}
+
+.how-text {
+  color: var(--not-so-important);
+  margin-left: 2%;
+  margin-right: 2%;
+  text-align: justify;
+  font-size: x-large;
+}
+
+.tx-details-explation {
+  font-size: x-large;
+  margin-left: 2%;
+}
+
 .tx-details {
   display: flex;
   flex-direction: column;
   margin: auto;
-  margin-top: 5%;
-  height: 50%;
+  height: 60%;
   width: 50%;
   font-size: 28px;
   background-color: var(--info-text-color);
   border-radius: 1rem;
   justify-content: flex-start;
   align-items: flex-start;
-  overflow-y: scroll;
+  overflow: scroll;
 }
 
 .txbox.initial {
@@ -202,15 +230,15 @@ nav {
 }
 
 .txbox.initial .l2name {
-  margin-left: 6%;
+  margin-left: 4.5%;
 }
 
 .txbox.initial .txhash {
-  margin-left: 7%;
+  margin-left: 9%;
 }
 
 .txbox.initial .l2fee {
-  margin-left: 9%;
+  margin-left: 7%;
 }
 
 .txbox.initial .l1fee {
@@ -218,7 +246,7 @@ nav {
 }
 
 .txbox.initial .feessaved {
-  margin-left: 6%;
+  margin-left: 7%;
 }
 
 .txbox.initial .cheapness {
@@ -314,5 +342,15 @@ footer {
     font-size: x-large;
     user-select: none;
     margin-left: auto;
+  }
+
+  .main {
+    padding-bottom: 750px;
+  }
+}
+
+@media (max-width: 550px) {
+  .main {
+    padding-bottom: 800px;
   }
 }

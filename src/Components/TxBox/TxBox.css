@@ -9,7 +9,7 @@ small {
   width: calc(100% - 4px);
   border: 2px solid var(--border-color);
   border-top: none;
-  background-color: var(--background-color);
+  background-color: var(--info-text-color);
   justify-content: space-evenly;
 }
 

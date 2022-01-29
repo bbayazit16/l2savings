@@ -1,5 +1,5 @@
 :root {
-  /* --background-color: #101d33; */
+  --background-color: #101d33;
   --border-color: #1e2c42;
   --buttonish-color: #111824;
   --buttonish-hover: #172e57;
@@ -7,6 +7,7 @@
   --chains-border: #182131;
   --shocking-info: #e32320;
   --disclaimer-color: #919191;
+  --not-so-important: #c9c9c9;
 }
 
 * {
@@ -17,13 +18,13 @@
 
 body {
   background-color: var(--background-color);
-  background: rgb(10, 24, 48);
-  background: radial-gradient(
+  /* background: rgb(10, 24, 48); */
+  /* background: radial-gradient(
     circle,
     rgba(10, 24, 48, 1) 15%,
     rgba(16, 29, 51, 1) 50%,
     rgba(10, 24, 48, 1) 85%
-  );
+  ); */
   /* credits to https://cssgradient.io/ for the awesome gradient maker! */
 }
 
