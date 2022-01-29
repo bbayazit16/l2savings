@@ -551,7 +551,7 @@ const App = () => {
   //
   //
   //  ZkSync Info Flow Diagram
-  //  
+  //
   //
   //
   //
