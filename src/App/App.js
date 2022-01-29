@@ -548,9 +548,59 @@ const App = () => {
     };
   };
 
-  // ZkSync has "types" of transactions
-  // Each type of transaction returns different information.
+  //
+  //
+  //  ZkSync Info Flow Diagram
+  //  
+  //
+  //
+  //
+  //   Fetch 100 Transactions
+  //   ┌─────────┐                          ┌─────────────┐
+  //   │L2Savings├───────────┬──────────────►api.zksync.io│
+  //   └─────────┘           │              └──────┬──────┘
+  //                         │                     │    Zero Transactions?  ┌──────┐       L2 -> L1 Gas Mapping
+  //                         │                     ├────────────────────────┤Return│     ┌─────────────────────────┐
+  //                         ├───────────◄─────────┘                        └──────┘     │ ETH Transfer -> 21,000  │
+  //                         │ Request until there are                                   │ ERC20 Transfer -> 65,000│
+  //                         │ no more txs or max limit reached                          │ Swap -> 160,000         │
+  //        Append to Array  │                                                           │ Mint NFT -> 150,000     │
+  //                         │                                                           └─────────────┬───────────┘
+  //                         │                                                                         │
+  //                         │                                                                         │
+  //                      ┌──▼──┐   ┌─────────────┐   For Each Tx  ┌───────────┐                       │
+  //                      │Array├───►Reverse Array├─▲──────────────►Transaction│                       │       ┌─────────────┐
+  //                      └──┬──┘   └─────────────┘ │              └─────┬─────┘        {Deposit}      │       │Average daily│
+  //                         │                      │                    │              {Withdraw}     │       │gas data     │
+  //                         │                      │    Yes     ┌───────┴──────┐       {WithdrawNFT}  │       └──────┬──────┘
+  // Get ETH prices in range │                      └────────────┤Is irrelevant?│====== {ForcedExit}   │              │
+  //       of first and last │                                   └───────┬──────┘       {ChangePubKey} │              │
+  //       transaction dates │                                           │                             │              │
+  //                         │                                        No ├───────────────────────┐     │              │
+  //                  ┌──────▼─────┐   Convert fees to ether with        │                       │     │              │
+  //   _\|/^          │Poloniex API├─────────────┐respect to ether ┌─────▼────────┐      ┌───────▼─────▼─┐            │
+  //    (_oo /        └────────────┘             │price on tx date │Fees paid with│      │Predict L1 gas │            │
+  //   /-|--/                                    │  ┌──────────────┤stablecoins?  │      │from tx type   │            │
+  //   \ |                                       │  │              └──────┬───────┘      └──────────┬────┘            │
+  //     /--i                                    │  │                     │                         │                 │
+  //    /   L                                  ┌─▼──▼─┐       No          │                         │                 │
+  //    L                                      │Tx Fee◄───────────────────┘                         │                 │
+  //     ▲               ┌──────┐              └───┬──┘                                             │                 │
+  //     │  Return Data  │      │                  │                   ┌──────────┐                 │                 │
+  //     └───────────────┤ Data ◄──────────────────┼───────────────────┤Fees if on│ Gas * Gas Price │                 │
+  //                     │      │                  │                   │ Mainnet  ◄─────────────────┴─────────────────┘
+  //                     └──▲───┘                  │                   └────┬─────┘
+  //                        │               ┌──────▼──┐                     │
+  //                        └───────────────┤Fee saved◄─────────────────────┘         Website Used: https://asciiflow.com/
+  //                                        └─────────┘                               Stickman Art: https://ascii.co.uk/art/stickman
+  //
+  //
+  //
   const getZkSyncInfo = async () => {
+    //
+    //
+    // ZkSync has "types" of transactions
+    // Each type of transaction returns different information.
     //
     //
     let from = "latest";
@@ -653,7 +703,9 @@ const App = () => {
       if (tokenId <= 6 || tokenId >= 500) {
         // Token ID <= 6 all stables
         if (tokenId === 2 || tokenId === 4) {
+          console.log(fee);
           fee *= 10 ** 12; // USDC and USDT has 6 decimal places
+          console.log(fee);
         }
         return fee / ETH_USD;
       }
@@ -702,10 +754,6 @@ const App = () => {
       //   nativeGasSpent: 35731,
       //   L1gasSpent: 0,
       // },
-      Swap: {
-        nativeGasSpent: 2350,
-        L1gasSpent: 160000, // average uniswap swap gas
-      },
       ETHTransfer: {
         nativeGasSpent: 1045,
         L1gasSpent: 21000,
@@ -713,6 +761,10 @@ const App = () => {
       ERC20Transfer: {
         nativeGasSpent: 1045,
         L1gasSpent: 65000,
+      },
+      Swap: {
+        nativeGasSpent: 2350,
+        L1gasSpent: 160000, // average uniswap swap gas
       },
       MintNFT: {
         nativeGasSpent: 2874,
@@ -752,7 +804,6 @@ const App = () => {
     const reversedData = allData.map(arr => arr.reverse()).reverse();
     //
     //
-
     let feesPaid = 0;
     let L1GasPredicted = 0;
     let nativeGasPredicted = 0;
