@@ -491,7 +491,7 @@ const App = () => {
         if (tx.from.toLowerCase() === account.address.toLowerCase()) {
           const L2Gas = parseInt(tx.gasUsed);
 
-          // Do not count L2 Deposits as
+          // Don't account L2 Deposits as
           // transactions
           if (L2Gas === 0) {
             continue;
@@ -1268,8 +1268,10 @@ const App = () => {
         // Rejected walletconnect request
       }
 
-      // store the old window.ethereum if
-      // the user has injected provider
+      // store the old window.ethereum in
+      // case the user has injected provider
+      // (if the user has metamask but is trying
+      // to connect with walletconnect)
       window.oldEthereum = window.ethereum;
 
       // EIP-1193 compatible
