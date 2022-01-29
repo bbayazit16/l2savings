@@ -608,10 +608,10 @@ const App = () => {
     //
     //
     let from = "latest";
-    const allData = [];
     let fetchedTxCount = 0;
     let firstTxDate = 0;
     let lastTxDate = 0;
+    const allData = [];
     // supporting maximum 1000 transactions
     // otherwise loading times will be too much
     const MAX_SUPPORTED_TRANSACTIONS = 1000;
