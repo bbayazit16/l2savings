@@ -703,9 +703,7 @@ const App = () => {
       if (tokenId <= 6 || tokenId >= 500) {
         // Token ID <= 6 all stables
         if (tokenId === 2 || tokenId === 4) {
-          console.log(fee);
           fee *= 10 ** 12; // USDC and USDT has 6 decimal places
-          console.log(fee);
         }
         return fee / ETH_USD;
       }
