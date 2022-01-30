@@ -1,7 +1,7 @@
 import "./App.css";
+import { createIcon } from "@download/blockies";
 import { useEffect, useState, useRef } from "react";
 import { ethers } from "ethers";
-import { createIcon } from "@download/blockies";
 import WalletConnectProvider from "@walletconnect/ethereum-provider";
 import historicalGasPrices from "../historicalGasPrices.json";
 // Component Imports
@@ -329,16 +329,16 @@ const App = () => {
     // await gasPriceOracle.getL1GasUsed(serializedTx);
   };
 
-  // L2 gas price is usually (according to Arbitrum)
-  // 100 times less than the L1 gas price.
-  // So L1 gas is 100 * L2 gas.
-  // Note that this might be changed as
-  // Arbitrum is upgraded. That's why
-  // blocknum is kept here as an unused
-  // property.
-  const avmL1GasScalar = (L2GasPrice, blockNum) => {
-    return L2GasPrice * 100;
-  };
+  // // L2 gas price is usually (according to Arbitrum)
+  // // 100 times less than the L1 gas price.
+  // // So L1 gas is 100 * L2 gas.
+  // // Note that this might be changed as
+  // // Arbitrum is upgraded. That's why
+  // // blocknum is kept here as an unused
+  // // property.
+  // const avmL1GasScalar = (L2GasPrice, blockNum) => {
+  //   return L2GasPrice * 100;
+  // };
 
   // Create a blockies identicon as
   // seen in Etherscan or other dapps
@@ -382,6 +382,10 @@ const App = () => {
         seenTxs.push(tx.hash);
         //
         if (tx.from.toLowerCase() === account.address.toLowerCase()) {
+          // Eliminate failed transactions and L2 deposits
+          if (tx.gasUsed === "0" || tx.txreceipt_status === "0") {
+            continue;
+          }
           //
           const serialized = ethers.utils.serializeTransaction({
             // Eslint does not recognize BigInt
@@ -491,27 +495,45 @@ const App = () => {
         if (tx.from.toLowerCase() === account.address.toLowerCase()) {
           const L2Gas = parseInt(tx.gasUsed);
 
-          // Don't account L2 Deposits as
-          // transactions
-          if (L2Gas === 0) {
+          // Don't account L2 Deposits and failed transactions
+          // as transactions
+          if (L2Gas === 0 || tx.txreceipt_status === "0") {
             continue;
           }
 
           // Arbiscan api returns the gas price bid and not the
-          // actual gas price paid. On average actual gas price
-          // paid is 0.27 gwei less. (from my observations)
-          const L2GasPrice = parseInt(tx.gasPrice) - 270000000;
-          const L1GasPrice = avmL1GasScalar(L2GasPrice, parseInt(tx.timeStamp));
+          // actual gas price paid.
+          // 0.2 gwei is an average used to esimate the actual
+          // gas price paid.
+          const L1GasPrice = averageDailyGas(parseInt(tx.timeStamp));
+          const L2GasPrice = L1GasPrice / 100 - 200000000;
 
           const feePaid = L2GasPrice * L2Gas;
 
-          // Usually +- 10% uncertainty
-          // Compared ETH transfers, ERC20 approval costs
-          // and ran contracts manually on remix javascript fork
-          // to compare arbgas to regular gas.
-          const gasIfOnMainnet = Math.round(
-            L2Gas / ((L1GasPrice / (100000000000 + L2GasPrice * 1.45)) * 12)
-          );
+          let gasIfOnMainnet;
+          if (L2Gas >= 410_000 && L2Gas <= 430_000) {
+            // ETH Transfer
+            gasIfOnMainnet = 21_000;
+          } else if (L2Gas >= 600_000 && L2Gas <= 800_000) {
+            gasIfOnMainnet = 160_000 + L2Gas / 100;
+          } else if (L2Gas >= 500_000 && L2Gas <= 600_000) {
+            gasIfOnMainnet = 50_000 + L2Gas / 100;
+          } else if (L2Gas >= 430_000 && L2Gas <= 5000) {
+            gasIfOnMainnet = 30_000 + L2Gas / 100;
+            // } else if (L2Gas >= 800_000 && L2Gas <= 1_000_000) {
+            //   gasIfOnMainnet = 160_000;
+            // } else if (L2Gas >= 900_000 && L2Gas <= 1_000_000) {
+            //   gasIfOnMainnet = 160_000;
+          } else {
+            gasIfOnMainnet = L2Gas / 8 + 25_000;
+          }
+
+          gasIfOnMainnet = Math.round(gasIfOnMainnet);
+
+          // const gasIfOnMainnet = Math.round(
+          //   (280000000000000 * L2Gas) / 100_00 / 5.5 / L1GasPrice +
+          //     L2Gas / 10
+          // );
 
           // fee if on mainnet
           const fiom = gasIfOnMainnet * L1GasPrice;
@@ -1367,20 +1389,18 @@ const App = () => {
 
   // On info ready
   useEffect(() => {
-    if (zkSyncTxns.display.length !== 0) {
-      setAllTxns({
-        actual: [].concat(
-          optimismTxns.actual,
-          arbitrumTxns.actual,
-          zkSyncTxns.actual
-        ),
-        display: [].concat(
-          optimismTxns.display,
-          arbitrumTxns.display,
-          zkSyncTxns.display
-        ),
-      });
-    }
+    setAllTxns({
+      actual: [].concat(
+        optimismTxns.actual,
+        arbitrumTxns.actual,
+        zkSyncTxns.actual
+      ),
+      display: [].concat(
+        optimismTxns.display,
+        arbitrumTxns.display,
+        zkSyncTxns.display
+      ),
+    });
     // eslint-disable-next-line
   }, [info]);
 
