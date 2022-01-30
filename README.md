@@ -95,9 +95,30 @@ This leaves us with only one unknown variable, L1 gas price during the time of t
 
 This principle makes it easy to calculate the total L2 transaction fee spent, (l2 gas \* l2 gas price), however makes it hard to estimate how much the transaction would cost if it was sent on Ethereum Mainnet. An Ether transfer typically costs around 420,000 gas, compared to Ethereum's 21,000 gas. Note that because L2 gas prices are low, it is cheaper to transfer Ether with 420,000 gas than 21,000 gas. In this case, gas is not a valid metric to compare transaction costs. Arbgas, compared to Ethereum L1 gas for common contract calls such as approve, transfer, and swap, approximately gives the following esimated formula:
 
-l1 gas = L2Gas / ((L1GasPrice / (100000000000 + L2GasPrice \* 1.45)) \* 12)
+```js
+if (L2Gas >= 410_000 && L2Gas <= 430_000) {
+  // ETH Transfer
+  gasIfOnMainnet = 21_000;
+} else if (L2Gas >= 600_000 && L2Gas <= 800_000) {
+  gasIfOnMainnet = 160_000 + L2Gas / 100;
+} else if (L2Gas >= 500_000 && L2Gas <= 600_000) {
+  gasIfOnMainnet = 50_000 + L2Gas / 100;
+} else if (L2Gas >= 430_000 && L2Gas <= 5000) {
+  gasIfOnMainnet = 30_000 + L2Gas / 100;
+} else {
+  gasIfOnMainnet = L2Gas / 8 + 25_000;
+}
+```
 
 Similar to Optimism, each non-zero byte of the RLP encoded transaction costs 16 units of gas and each zero byte of RLP encoded transaction costs 4 gas. However my efforts to formulate an equation with this approach was ill-fated. If you have a better formula, please open an issue. I'd appreciate some help 🙂.
+
+## ZkSync
+
+[ZkSync](https://zksync.io/) is a [ZK (Zero Knowledge) Rollup](https://docs.ethhub.io/ethereum-roadmap/layer-2-scaling/zk-rollups/) which is an L2 much cheaper than Optimistic Rollups.
+
+> Two rollups walk into a bar. The barman asks: "Can I see your ids?". ZK Rollup says: "I can prove to you I'm over 18, but I won't show you my id". Optimistic Rollup says: "If nobody can prove I'm underage in 7 days that means I'm over 18" [Source](https://twitter.com/l2beatcom/status/1448556881686024192)
+
+ However ZkSync is not EVM equivalent, making it harder to predict equivalent L1 gas cost of operations. ZkSync has "types" of transactions, which are ChangePubKey, Transfer, Swap, Withdraw, ForcedExit, MintNFT and WithdrawNFT. The L2 <--> L1 gas is estimate is thus done by using the average costs for each operation on Ethereum L1. Which means Ether transfers are considered as 21000 gas, token transfers 65000, swaps 160000 and NFT Mints 150000. ZkSync also allows users to pay with different tokens, such as stablecoins, which requires the conversion of fees paid into ether with the price rate during the time of transaction. For a diagram of how the calculation process goes, see line 580.
 
 ## Installing Dependencies
 
@@ -154,5 +175,5 @@ serve -s build
 - ENS for names and profile photos
 - Etherscan, Optimistic Etherscan, Arbiscan API's
 - Pandas and Requests for average gas price data script
-- Optimism, Arbitrum, and all other teams working on scaling
+- Optimism, Arbitrum, ZkSync and all other teams working on scaling
 - Ethereum

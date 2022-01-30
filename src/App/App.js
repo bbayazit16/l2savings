@@ -576,7 +576,8 @@ const App = () => {
 
   //
   //
-  //  ZkSync Info Flow Diagram
+  //
+  //   ZkSync Info Flow Diagram
   //
   //
   //
@@ -1659,11 +1660,13 @@ const App = () => {
         <div className="leftbottom">
           <div>
             <p className="disclaimer">
-              Made possible by Etherscan & ZkSync API's. No project featured is sponsored.
+              Made possible by Etherscan & ZkSync API's. 
             </p>
             <p className="disclaimer">
-              Data is provided as is, with no guarantee of accuracy. Expect up
-              to 10% inaccuracy.
+              Projects featured are not sponsored. Do your own research.
+            </p>
+            <p className="disclaimer">
+              Data is provided as is, with no guarantee of accuracy.
             </p>
           </div>
         </div>
