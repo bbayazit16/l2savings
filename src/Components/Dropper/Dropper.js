@@ -6,7 +6,12 @@ const Dropper = ({ text, names, urls }) => {
   return (
     <div className="dropbutton">
       <Buttonish text={text} noWrap={true} className="dropmenu" />
-      <div className="dropcontent">
+      <div
+        className="dropcontent"
+        style={{
+          marginTop: "calc(" + (3.1 * names.length + 0.6) + "%",
+        }}
+      >
         {names.map((_, index) => {
           return (
             <Buttonish

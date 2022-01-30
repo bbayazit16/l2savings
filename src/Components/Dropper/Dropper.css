@@ -13,15 +13,14 @@
 .dropcontent {
   display: none;
   position: absolute;
-  margin-top: calc(12.5% + 4px);
 }
 
 .dropcontent a {
+  display: block;
   height: 1rem;
   width: 8rem;
   padding: 6px;
   margin: 0;
-  display: block;
 }
 
 .dropcontent p {

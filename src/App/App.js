@@ -1461,18 +1461,36 @@ const App = () => {
           </div>
 
           <Dropper
-            text={"Bridge To L2's"}
+            text={"Use L2's"}
             names={[
-              "Hop Bridge",
               "Optimistic Gateway",
               "Arbitrum Bridge",
               "ZkSync Wallet",
+              "Hop Bridge",
+              "Argent",
             ]}
             urls={[
-              "https://hop.exchange/",
               "https://gateway.optimism.io/",
               "https://bridge.arbitrum.io/",
               "https://wallet.zksync.io/",
+              "https://hop.exchange/",
+              "https://www.argent.xyz/",
+            ]}
+          />
+
+          <Dropper
+            text={"Discover L2's"}
+            names={[
+              "L2Beat",
+              "L2Fees",
+              "(Advanced) Polynya",
+              "(Advanced) Vitalik",
+            ]}
+            urls={[
+              "https://l2beat.com/",
+              "https://l2fees.info/",
+              "https://polynya.medium.com/",
+              "https://vitalik.ca/",
             ]}
           />
 
@@ -1641,7 +1659,7 @@ const App = () => {
         <div className="leftbottom">
           <div>
             <p className="disclaimer">
-              Made possible by Etherscan & ZkSync API's.
+              Made possible by Etherscan & ZkSync API's. No project featured is sponsored.
             </p>
             <p className="disclaimer">
               Data is provided as is, with no guarantee of accuracy. Expect up
