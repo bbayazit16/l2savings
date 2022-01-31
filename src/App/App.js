@@ -1380,7 +1380,6 @@ const App = () => {
     if (account.address) {
       fetchMetadata();
       getInfo().then(_info => {
-        window.downloadData = encodeURIComponent(JSON.stringify(_info));
         serialLocalization(_info);
         setInfo(_info);
       });
@@ -1390,6 +1389,18 @@ const App = () => {
 
   // On info ready
   useEffect(() => {
+    window.downloadData = encodeURIComponent(
+      JSON.stringify([
+        info,
+        {
+          transactions: {
+            optimism: optimismTxns.actual,
+            arbitrum: arbitrumTxns.actual,
+            zksync: zkSyncTxns.actual,
+          },
+        },
+      ])
+    );
     setAllTxns({
       actual: [].concat(
         optimismTxns.actual,
@@ -1660,7 +1671,7 @@ const App = () => {
         <div className="leftbottom">
           <div>
             <p className="disclaimer">
-              Made possible by Etherscan & ZkSync API's. 
+              Made possible by Etherscan & ZkSync API's.
             </p>
             <p className="disclaimer">
               Projects featured are not sponsored. Do your own research.
