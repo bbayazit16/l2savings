@@ -1710,7 +1710,7 @@ const App = () => {
           calculate the total amount of gas you would spend if you sent these
           transactions on L1 and the transaction fees paid on L2's. The gas is
           then muliplied with the average gas price of Ethereum on the
-          transaction's date.
+          transaction's day.
         </p>
         <p className="tx-details-explation">
           To see your data for a specific L2, switch between L2's above.
