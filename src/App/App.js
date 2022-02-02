@@ -22,8 +22,6 @@ import zksync from "../Assets/zksync.svg";
 import triangle from "../Assets/triangle.svg";
 //
 
-// TODO: Add individual tx informations to download data
-
 const App = () => {
   const [connectWalletClicked, setConnectWalletClicked] = useState(false);
   const [randomTweet, setRandomTweet] = useState("");
