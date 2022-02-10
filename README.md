@@ -152,13 +152,4 @@ serve -s build
 ## Made Possible Thanks To
 
 - @download/blockies for blockies identicons
-- Chainlink Oracles
-- Metamask
-- WalletConnect
-- Ethers
-- React
-- ENS for names and profile photos
-- Etherscan, Optimistic Etherscan, Arbiscan API's
-- Pandas and Requests for average gas price data script
-- Optimism, Arbitrum, ZkSync and all other teams working on scaling
-- Ethereum
+- Ethers, Etherscan, Optimistic Etherscan, Arbiscan, ZkSync API's
