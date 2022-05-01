@@ -284,7 +284,13 @@ const App = () => {
     if (index <= 2071713) {
       return 1.5;
     }
-    return 1.24;
+    if (index <= 5368652) {
+      return 1.24;
+    }
+    // On transaction index 5368652, Optimism
+    // reduced the L1fee scalar from 1.24 to 1.00.
+    // https://optimistic.etherscan.io/tx/5368652
+    return 1.0;
   };
 
   // on index 2071714 Optimism

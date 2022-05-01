@@ -32,7 +32,7 @@ Fees if the transaction was sent on L1 at the same day with exactly the same gas
 
 For EVM equivalent L2's such as [Optimism](https://optimism.io/), it is easy to calculate the equivalent L1 cost, because the concept of gas is same on the L2. (L2 Gas \* Mainnet gas price at the time of transaction).
 
-The formula for Optimism Transaction fee is (Gas Price _ Gas) + (L1 Gas Used _ L1 Fee Scalar \* L1 Gas Price).
+The formula for Optimism Transaction fee is (Gas Price _Gas) + (L1 Gas Used_ L1 Fee Scalar \* L1 Gas Price).
 Optimistic Etherscan doesn't provide the transaction fee in their API, let alone the L1 Fee Scalar, L1 Gas Price and L1 Gas used. They also can not be found through JSON RPC API eth_getTransactionReceipt. So how do we calculate the transaction fee?
 
 #### The OVM Gas Price Oracle
@@ -63,6 +63,8 @@ From the Natspec comment on the contract:
 Overhead on Optimism is currently 2100 gas, dropped from 2750 gas on transaction index [2071714](https://optimistic.etherscan.io/tx/2071714).
 
 Similarly, L1 fee scalar was dropped from 1.5 to 1.24 on index [2071713](https://optimistic.etherscan.io/tx/2071713).
+
+Update: L1 fee scalar was dropped from 1.24 to 1.00 on index [5368652](https://optimistic.etherscan.io/tx/5368652).
 
 Now that overhead and L1 gas scalar is known, the function can be implemented on Javascript to avoid sending requests to the contract for each transaction and to calculate the L1 gas used with a specific amount of overhead (2750 gas before index 2071714, 2100 after).
 
