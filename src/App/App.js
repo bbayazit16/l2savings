@@ -273,7 +273,7 @@ const App = () => {
   // is found returns 110 gwei.
   const averageDailyGas = timestamp => {
     timestamp = timestamp - (timestamp % 86400); // seconds per day
-    return historicalGasPrices[timestamp] || 110000000000; // 110 gwei
+    return historicalGasPrices[timestamp] || 30000000000; // 30 gwei
   };
 
   // On index 2071713 Optimism
@@ -671,7 +671,7 @@ const App = () => {
       firstTxDate =
         Math.round(
           new Date(data.result.list[lastElementIndex].createdAt).getTime() /
-          1000
+            1000
         ) - 86400; // subtract 1 day to be safe
       //
       //
@@ -1486,7 +1486,7 @@ const App = () => {
               "ZkSync Wallet",
               "Hop Bridge",
               "Argent",
-              "Bungee"
+              "Bungee",
             ]}
             urls={[
               "https://gateway.optimism.io/",
@@ -1494,7 +1494,7 @@ const App = () => {
               "https://wallet.zksync.io/",
               "https://hop.exchange/",
               "https://www.argent.xyz/",
-              "https://bungee.exchange/"
+              "https://bungee.exchange/",
             ]}
           />
 
@@ -1800,25 +1800,25 @@ const App = () => {
         <div className="tx-details-main">
           {showAllChains && info.txCount !== "..."
             ? allTxns.display.map((tx, index) => {
-              return (
-                <TxBox img={chainToAsset(tx.l2)} txObj={tx} key={index} />
-              );
-            })
+                return (
+                  <TxBox img={chainToAsset(tx.l2)} txObj={tx} key={index} />
+                );
+              })
             : null}
           {showOptimism && info.txCount !== "..."
             ? optimismTxns.display.map((tx, index) => {
-              return <TxBox img={optimism} txObj={tx} key={index} />;
-            })
+                return <TxBox img={optimism} txObj={tx} key={index} />;
+              })
             : null}
           {showArbitrum && info.txCount !== "..."
             ? arbitrumTxns.display.map((tx, index) => {
-              return <TxBox img={arbitrum} txObj={tx} key={index} />;
-            })
+                return <TxBox img={arbitrum} txObj={tx} key={index} />;
+              })
             : null}
           {showZkSync && info.txCount !== "..."
             ? zkSyncTxns.display.map((tx, index) => {
-              return <TxBox img={zksync} txObj={tx} key={index} />;
-            })
+                return <TxBox img={zksync} txObj={tx} key={index} />;
+              })
             : null}
         </div>
       </div>
