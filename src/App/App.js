@@ -176,8 +176,10 @@ const App = () => {
   // Chainlink Oracle Abi
   const oracleAbi = () => {
     // prettier-ignore
-    return [{constant:true,inputs:[],name:"latestAnswer",outputs:[{name:"",type:"int256",},],
-    payable:false,stateMutability:"view",type:"function"}];
+    return [{
+      constant: true, inputs: [], name: "latestAnswer", outputs: [{ name: "", type: "int256", },],
+      payable: false, stateMutability: "view", type: "function"
+    }];
   };
 
   // Grammar mistakes? Open an issue please. Thanks!
@@ -669,7 +671,7 @@ const App = () => {
       firstTxDate =
         Math.round(
           new Date(data.result.list[lastElementIndex].createdAt).getTime() /
-            1000
+          1000
         ) - 86400; // subtract 1 day to be safe
       //
       //
@@ -1484,6 +1486,7 @@ const App = () => {
               "ZkSync Wallet",
               "Hop Bridge",
               "Argent",
+              "Bungee"
             ]}
             urls={[
               "https://gateway.optimism.io/",
@@ -1491,6 +1494,7 @@ const App = () => {
               "https://wallet.zksync.io/",
               "https://hop.exchange/",
               "https://www.argent.xyz/",
+              "https://bungee.exchange/"
             ]}
           />
 
@@ -1796,25 +1800,25 @@ const App = () => {
         <div className="tx-details-main">
           {showAllChains && info.txCount !== "..."
             ? allTxns.display.map((tx, index) => {
-                return (
-                  <TxBox img={chainToAsset(tx.l2)} txObj={tx} key={index} />
-                );
-              })
+              return (
+                <TxBox img={chainToAsset(tx.l2)} txObj={tx} key={index} />
+              );
+            })
             : null}
           {showOptimism && info.txCount !== "..."
             ? optimismTxns.display.map((tx, index) => {
-                return <TxBox img={optimism} txObj={tx} key={index} />;
-              })
+              return <TxBox img={optimism} txObj={tx} key={index} />;
+            })
             : null}
           {showArbitrum && info.txCount !== "..."
             ? arbitrumTxns.display.map((tx, index) => {
-                return <TxBox img={arbitrum} txObj={tx} key={index} />;
-              })
+              return <TxBox img={arbitrum} txObj={tx} key={index} />;
+            })
             : null}
           {showZkSync && info.txCount !== "..."
             ? zkSyncTxns.display.map((tx, index) => {
-                return <TxBox img={zksync} txObj={tx} key={index} />;
-              })
+              return <TxBox img={zksync} txObj={tx} key={index} />;
+            })
             : null}
         </div>
       </div>
