@@ -29,9 +29,9 @@
         "vm-browserify": "^1.1.2"
     },
     "scripts": {
-        "dev": "react-app-rewired start",
+        "dev": "GENERATE_SOURCEMAP=false react-app-rewired start",
         "build": "react-app-rewired build",
-        "test": "rreact-app-rewired eact-scripts test",
+        "test": "react-app-rewired react-scripts test",
         "eject": "react-app-rewired react-scripts eject"
     },
     "browserslist": {
