@@ -20,7 +20,7 @@ Following data is provided for every supported chain:
 - L1 Fees Paid in Ether (If L2 transactions were sent on L1)
 - L1 Fees Paid in USD
 - Fees Saved in Ether and USD
-- Times cheaper (How many times is L2 cheaper than L1)
+- Times cheaper (Fee If On L1 / L2 Fee paid)
 
 ## How Savings Are Calculated
 
@@ -66,7 +66,7 @@ else                             (arbgas / 8) + 21_000;
 
 > Two rollups walk into a bar. The barman asks: "Can I see your ids?". ZK Rollup says: "I can prove to you I'm over 18, but I won't show you my id". Optimistic Rollup says: "If nobody can prove I'm underage in 7 days that means I'm over 18" [Source](https://twitter.com/l2beatcom/status/1448556881686024192)
 
- However ZkSync is not EVM equivalent, making it harder to predict equivalent L1 gas cost of operations. ZkSync has "types" of transactions, which are ChangePubKey, Transfer, Swap, Withdraw, ForcedExit, MintNFT and WithdrawNFT. The L2 <--> L1 gas is estimate is thus done by using the average costs for each operation on Ethereum L1. Which means Ether transfers are considered as 21000 gas, token transfers 65000, swaps 160000 and NFT Mints 150000. ZkSync also allows users to pay with different tokens, such as stablecoins, which requires the conversion of fees paid into ether with the price rate during the time of transaction. For a diagram of how the calculation process goes, see [this diagram.](https://github.com/bbayazit16/L2Savings/blob/master/src/Savings/ZkSync.ts#L20).
+ However ZkSync is not EVM equivalent, making it harder to predict equivalent L1 gas cost of operations. ZkSync has "types" of transactions, which are ChangePubKey, Transfer, Swap, Withdraw, ForcedExit, MintNFT and WithdrawNFT. The L2 <--> L1 gas is estimate is thus done by using the average costs for each operation on Ethereum L1. Which means Ether transfers are considered as 21000 gas, token transfers 65000, swaps 160000 and NFT Mints 150000. ZkSync also allows users to pay with different tokens, such as stablecoins, which requires the conversion of fees paid into ether with the price rate during the time of transaction. For a diagram of how the calculation process goes, see [this diagram](https://github.com/bbayazit16/L2Savings/blob/master/src/Savings/ZkSync.ts#L20).
 
 ## Installing Dependencies
 
