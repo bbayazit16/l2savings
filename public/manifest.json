@@ -1,16 +1,21 @@
 {
-  "short_name": "L2Savings",
-  "name": "L2Savings",
-  "description": "How much have you saved by using Ethereum L2's?",
-  "icons": [
-    {
-      "src": "favicon.ico",
-      "sizes": "256x256",
-      "type": "image/x-icon"
-    }
-  ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+    "short_name": "L2Savings",
+    "name": "L2Savings",
+    "description": "How much have you saved by using Ethereum L2's?",
+    "icons": [
+        {
+            "src": "favicon.ico",
+            "sizes": "256x256",
+            "type": "image/x-icon"
+        },
+        {
+            "src": "favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        }
+    ],
+    "start_url": ".",
+    "display": "standalone",
+    "theme_color": "#000000",
+    "background_color": "#ffffff"
 }
