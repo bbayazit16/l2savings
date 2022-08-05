@@ -1,6 +1,6 @@
-const webpack = require("webpack")
+import { ProvidePlugin } from "webpack"
 
-module.exports = override = config => {
+export default override = config => {
     config.resolve.fallback = {
         util: require.resolve("util/"),
         url: require.resolve("url"),
@@ -10,7 +10,7 @@ module.exports = override = config => {
     }
 
     config.plugins.push(
-        new webpack.ProvidePlugin({
+        new ProvidePlugin({
             process: "process/browser",
             Buffer: ["buffer", "Buffer"],
         })
