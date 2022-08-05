@@ -80,6 +80,8 @@ yarn install
 
 _Make sure you are on the root directory and have yarn installed._
 
+Create .env file and add environment variables (by referring to .env.example)
+
 ```sh
 yarn dev
 ```
@@ -87,6 +89,8 @@ yarn dev
 ## Building From Source
 
 _Make sure you are on the root directory and have yarn installed._
+
+Create .env file and add environment variables (by referring to .env.example)
 
 ```sh
 yarn build
