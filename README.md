@@ -56,9 +56,10 @@ This principle makes it easy to calculate the total L2 transaction fee spent, (l
 - 150,000 gas for stake
 
 For other signatures, use the following formula:
-arbgas <= 450,000                21,000
-450,000 < arbgas <= 750,000      50,000 + arbgas / 100
-else                             (arbgas / 8) + 21_000;
+
+- arbgas <= 450,000 == 21,000
+- 450,000 < arbgas <= 750,000  == 50,000 + arbgas / 100
+- else == (arbgas / 8) + 21_000;
 
 ## ZkSync
 
@@ -81,6 +82,8 @@ yarn install
 _Make sure you are on the root directory and have yarn installed._
 
 Create .env file and add environment variables (by referring to .env.example)
+
+Modify .env.development to change default development RPCs
 
 ```sh
 yarn dev
