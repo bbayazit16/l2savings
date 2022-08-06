@@ -114,6 +114,11 @@ export default class Arbitrum implements L2 {
     public async calculateSavings(): Promise<Savings> {
         const transactions = await this.getAllTransactions()
 
+        this.onSavingCalculated({
+            current: 0,
+            total: transactions.length,
+        })
+
         if (transactions.length == 0) {
             return Utils.noSavings
         }

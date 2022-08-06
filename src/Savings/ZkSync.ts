@@ -340,6 +340,11 @@ export default class ZkSync implements L2 {
             }
         }
 
+        this.onSavingCalculated({
+            current: allSavings.length,
+            total: allSavings.length,
+        })
+
         const totalL1FeesUsd = await Utils.ethToUsd(totalL1Fees)
         const totalL2FeesUsd = await Utils.ethToUsd(totalL2Fees)
 
