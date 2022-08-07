@@ -71,7 +71,7 @@ const TransactionBox = ({ savings, viewing }: ITransactionBox) => {
                         "w-4",
                         "mr-1",
                         "overflow-hidden",
-                        "md:h-8",
+                        "h-fit",
                         "md:w-8",
                     ]
                         .concat(transaction.L2 === "optimism" ? ["border-black", "border-2"] : [])
