@@ -266,17 +266,19 @@ export default class Utils {
         }
 
         if (response.status === 429) {
-            await new Promise(p => setTimeout(p, 1000 * (totalRetries + 1)))
+            await new Promise(p => setTimeout(p, 1024 * (totalRetries + 1)))
             return Utils.fetch(url, params, totalRetries + 1)
         } else if (!response.ok) {
-            await new Promise(p => setTimeout(p, 1000 * (totalRetries + 1)))
+            await new Promise(p => setTimeout(p, 1024 * (totalRetries + 1)))
             return Utils.fetch(url, params, totalRetries + 1, true)
         }
 
         return await response.json()
     }
 
-    // DEPRECATED, unless required again
+    // DEPRECATED, until required again
+    //
+    //
     // public static async getCustomReceipt(url: string, hash: string): Promise<any> {
     //     const response = await Utils.fetch(url, {
     //         method: "POST",
@@ -397,7 +399,7 @@ export default class Utils {
         } else {
             // ??? Storage corrupted
             localStorage.clear()
-            window.close()
+            window.location.reload()
         }
     }
 
