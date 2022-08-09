@@ -115,6 +115,7 @@ export default class Arbitrum implements L2 {
         const transactions = await this.getAllTransactions()
 
         this.onSavingCalculated({
+            text: "Fetching transaction receipts",
             current: 0,
             total: transactions.length,
         })
@@ -141,6 +142,7 @@ export default class Arbitrum implements L2 {
                 ).then(receipts => {
                     onChunk += chunk.length
                     this.onSavingCalculated({
+                        text: "Fetching transaction receipts",
                         current: onChunk,
                         total: transactions.length,
                     })
@@ -165,6 +167,7 @@ export default class Arbitrum implements L2 {
             .filter(receipt => receipt.receipt !== null && receipt.receipt !== undefined)
 
         this.onSavingCalculated({
+            text: "Fetching transaction receipts",
             current: 0,
             total: flatReceipts.length,
         })
@@ -193,6 +196,7 @@ export default class Arbitrum implements L2 {
             transactionsCalculated++
 
             this.onSavingCalculated({
+                text: "Calculating savings",
                 current: transactionsCalculated,
                 total: transactions.length,
             })
@@ -214,6 +218,7 @@ export default class Arbitrum implements L2 {
         }
 
         this.onSavingCalculated({
+            text: "Calculating savings",
             current: transactionsCalculated,
             total: transactionsCalculated,
         })

@@ -56,7 +56,8 @@ export default class Utils {
 
     public static connected: boolean = false
 
-    public static readonly noProgress = {
+    public static readonly noProgress: CalcProgress = {
+        text: "Fetching transaction receipts",
         current: 0,
         total: undefined,
     }

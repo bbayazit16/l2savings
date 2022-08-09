@@ -15,6 +15,7 @@ const FetchingInfo = ({ progress }: IFetchingInfo) => {
                     <Info
                         key={index}
                         title={`Fetching ${displayName} transactions`}
+                        subtitle={progress.text}
                         text={`${progress.current || "0"}/${progress.total || "?"}`}
                         disappear={progress.total === progress.current}
                         completionTitle={`Fetched ${displayName} transactions`}
