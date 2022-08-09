@@ -90,16 +90,49 @@ export default class Optimism implements L2 {
         // is equivalent to each unit of L2 gas :)
         let totalGasSpent = 0
 
+        let onChunk = 0
+        // Chunk receipts into batches of 10 (to avoid hitting api limits)
+        const receipts = await Promise.all(
+            Utils.chunk(transactions, 10).map(async chunk => {
+                return Utils.getBatchCustomReceipts(
+                    process.env.REACT_APP_OPTIMISM_RPC!,
+                    chunk.map(chunk => chunk.hash)
+                ).then(receipts => {
+                    onChunk += chunk.length
+                    this.onSavingCalculated({
+                        current: onChunk,
+                        total: transactions.length,
+                    })
+                    return {
+                        receipts,
+                        gasPrices: chunk.map(chunk => chunk.gasPrice),
+                    }
+                })
+            })
+        )
+
+        const flatReceipts = receipts
+            .map(({ receipts, gasPrices }) => {
+                return receipts.map((receipt: any, index: number) => {
+                    return {
+                        receipt,
+                        gasPrice: gasPrices[index],
+                    }
+                })
+            })
+            .flat()
+            .filter(receipt => receipt.receipt !== null && receipt.receipt !== undefined)
+
+        this.onSavingCalculated({
+            current: 0,
+            total: flatReceipts.length,
+        })
+
         let transactionsCalculated = 0
-        for (const { hash, gasPrice } of transactions) {
+        for (const { receipt, gasPrice } of flatReceipts) {
             if (!Utils.connected) {
                 throw new Error("Cancelled")
             }
-
-            const receipt: any = await Utils.getCustomReceipt(
-                process.env.REACT_APP_OPTIMISM_RPC!,
-                hash
-            )
 
             const L2Fee = Utils.weiToEther(
                 BigInt(receipt.gasUsed) * BigInt(gasPrice) + BigInt(receipt.l1Fee)
@@ -111,12 +144,12 @@ export default class Optimism implements L2 {
 
             this.onSavingCalculated({
                 current: transactionsCalculated,
-                total: transactions.length,
+                total: flatReceipts.length,
             })
 
             allSavings.push({
                 L2: "optimism",
-                hash,
+                hash: receipt.transactionHash,
                 L2Fee,
                 L1Fee,
                 saved: L1Fee - L2Fee,
@@ -128,6 +161,11 @@ export default class Optimism implements L2 {
 
             totalGasSpent += parseInt(receipt.gasUsed, 16)
         }
+
+        this.onSavingCalculated({
+            current: transactionsCalculated,
+            total: transactionsCalculated,
+        })
 
         const totalL1FeesUsd = await Utils.ethToUsd(totalL1Fees)
         const totalL2FeesUsd = await Utils.ethToUsd(totalL2Fees)

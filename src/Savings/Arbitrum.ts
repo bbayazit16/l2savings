@@ -131,16 +131,49 @@ export default class Arbitrum implements L2 {
         let totalL1GasPredicted = 0
         let totalL2GasSpent = 0
 
+        let onChunk = 0
+        // Chunk receipts into batches of 10 (to avoid hitting api limits)
+        const receipts = await Promise.all(
+            Utils.chunk(transactions, 10).map(async chunk => {
+                return Utils.getBatchCustomReceipts(
+                    process.env.REACT_APP_ARBITRUM_RPC!,
+                    chunk.map(chunk => chunk.hash)
+                ).then(receipts => {
+                    onChunk += chunk.length
+                    this.onSavingCalculated({
+                        current: onChunk,
+                        total: transactions.length,
+                    })
+                    return {
+                        receipts,
+                        methods: chunk.map(chunk => chunk.method),
+                    }
+                })
+            })
+        )
+
+        const flatReceipts = receipts
+            .map(({ receipts, methods }) => {
+                return receipts.map((receipt: any, index: number) => {
+                    return {
+                        receipt,
+                        method: methods[index],
+                    }
+                })
+            })
+            .flat()
+            .filter(receipt => receipt.receipt !== null && receipt.receipt !== undefined)
+
+        this.onSavingCalculated({
+            current: 0,
+            total: flatReceipts.length,
+        })
+
         let transactionsCalculated = 0
-        for (const { hash, method } of transactions) {
+        for (const { receipt, method } of flatReceipts) {
             if (!Utils.connected) {
                 throw new Error("Cancelled")
             }
-
-            const receipt: any = await Utils.getCustomReceipt(
-                process.env.REACT_APP_ARBITRUM_RPC!,
-                hash
-            )
 
             const paid: any = receipt.feeStats.paid
 
@@ -166,7 +199,7 @@ export default class Arbitrum implements L2 {
 
             allSavings.push({
                 L2: "arbitrum",
-                hash,
+                hash: receipt.transactionHash,
                 L2Fee,
                 L1Fee,
                 saved: L1Fee - L2Fee,
@@ -179,6 +212,11 @@ export default class Arbitrum implements L2 {
             totalL1GasPredicted += L1Gas
             totalL2GasSpent += L2Gas
         }
+
+        this.onSavingCalculated({
+            current: transactionsCalculated,
+            total: transactionsCalculated,
+        })
 
         const totalL1FeesUsd = await Utils.ethToUsd(totalL1Fees)
         const totalL2FeesUsd = await Utils.ethToUsd(totalL2Fees)

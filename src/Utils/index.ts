@@ -292,6 +292,35 @@ export default class Utils {
         return response.result
     }
 
+    public static async getBatchCustomReceipts(url: string, hashes: string[]): Promise<any> {
+        const response = await Utils.fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(
+                hashes.map((hash, index) => ({
+                    jsonrpc: "2.0",
+                    method: "eth_getTransactionReceipt",
+                    params: [hash],
+                    id: index,
+                }))
+            ),
+        })
+
+        return response.map((res: any) => res.result)
+    }
+
+    public static chunk<T>(array: T[], size: number): T[][] {
+        const chunks = []
+
+        for (let i = 0; i < array.length; i += size) {
+            chunks.push(array.slice(i, i + size))
+        }
+
+        return chunks
+    }
+
     public static async connectWallet(
         connectionType: "metamask" | "walletconnect",
         setAccount: (account: Account) => void
