@@ -118,8 +118,9 @@ serve -s build
 
 [AGPL-3.0-only](LICENSE)
 
-## Made Possible Thanks To
+## Special Thanks To
 
 - @download/blockies for blockies identicons
 - Ethers, Etherscan, Optimistic Etherscan, Arbiscan, ZkSync API's
-- David Mihal's Ethereum Average Fees Subgraph
+- David Mihal for the Ethereum Average Fees Subgraph
+- @shreykeny for suggesting me to use batch requests
