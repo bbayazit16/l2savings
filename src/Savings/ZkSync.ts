@@ -124,7 +124,7 @@ export default class ZkSync implements L2 {
 
             if (transactions.length === 0 && fetchedTxCount === 0) {
                 this.onSavingCalculated({
-                    text: "Fetching transaction receipts",
+                    text: "Calculated savings",
                     current: 0,
                     total: 0,
                 })

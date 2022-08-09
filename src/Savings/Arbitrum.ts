@@ -121,6 +121,11 @@ export default class Arbitrum implements L2 {
         })
 
         if (transactions.length == 0) {
+            this.onSavingCalculated({
+                text: "Calculated savings",
+                current: 0,
+                total: 0,
+            })
             return Utils.noSavings
         }
 
