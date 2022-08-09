@@ -310,6 +310,9 @@ export default class Utils {
             ),
         })
 
+        // Wait for a second after batch requests to avoid limits
+        await new Promise(p => setTimeout(p, 1000))
+
         return response.map((res: any) => res.result)
     }
 
