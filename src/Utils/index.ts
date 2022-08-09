@@ -266,10 +266,10 @@ export default class Utils {
         }
 
         if (response.status === 429) {
-            await new Promise(p => setTimeout(p, 1000 * (totalRetries + 1)))
+            await new Promise(p => setTimeout(p, 2000 * (totalRetries + 1)))
             return Utils.fetch(url, {}, totalRetries + 1)
         } else if (!response.ok) {
-            await new Promise(p => setTimeout(p, 500 * (totalRetries + 1)))
+            await new Promise(p => setTimeout(p, 1000 * (totalRetries + 1)))
             return Utils.fetch(url, {}, totalRetries + 1, true)
         }
 
@@ -310,8 +310,8 @@ export default class Utils {
             ),
         })
 
-        // Wait for a second after batch requests to avoid limits
-        await new Promise(p => setTimeout(p, 1000))
+        // Wait for two seconds after batch requests to avoid limits
+        await new Promise(p => setTimeout(p, 2000))
 
         return response.map((res: any) => res.result)
     }
@@ -397,7 +397,7 @@ export default class Utils {
         } else {
             // ??? Storage corrupted
             localStorage.clear()
-            window.location.reload()
+            window.close()
         }
     }
 
