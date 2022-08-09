@@ -81,6 +81,7 @@ yarn install
 _Make sure you are on the root directory and have yarn installed._
 
 Create .env file and add environment variables (by referring to .env.example)
+Make sure RPCs support batch JSON RPC requests.
 
 ```sh
 yarn dev
@@ -91,6 +92,7 @@ yarn dev
 _Make sure you are on the root directory and have yarn installed._
 
 Create .env file and add environment variables (by referring to .env.example)
+Make sure RPCs support batch JSON RPC requests.
 
 ```sh
 yarn build
