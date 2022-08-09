@@ -244,7 +244,7 @@ export default class ZkSync implements L2 {
                             transactionsCalculated++
 
                             this.onSavingCalculated({
-                                text: "Calculating savings",
+                                text: "Calculating fees",
                                 current: transactionsCalculated,
                                 total: totalTransactionsLength,
                             })
@@ -286,7 +286,7 @@ export default class ZkSync implements L2 {
                     transactionsCalculated++
 
                     this.onSavingCalculated({
-                        text: "Calculating savings",
+                        text: "Calculating fees",
                         current: transactionsCalculated,
                         total: totalTransactionsLength,
                     })
@@ -324,9 +324,12 @@ export default class ZkSync implements L2 {
                     transactionsCalculated++
 
                     this.onSavingCalculated({
-                        text: "Calculating savings",
+                        text: "Calculating fees",
                         current: transactionsCalculated,
-                        total: totalTransactionsLength,
+                        total:
+                            totalTransactionsLength > transactionsCalculated
+                                ? totalTransactionsLength
+                                : transactionsCalculated,
                     })
 
                     allSavings.push({
@@ -346,7 +349,7 @@ export default class ZkSync implements L2 {
         }
 
         this.onSavingCalculated({
-            text: "Calculating savings",
+            text: "Calculated savings",
             current: allSavings.length,
             total: allSavings.length,
         })

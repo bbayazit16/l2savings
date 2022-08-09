@@ -276,22 +276,23 @@ export default class Utils {
         return await response.json()
     }
 
-    public static async getCustomReceipt(url: string, hash: string): Promise<any> {
-        const response = await Utils.fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                jsonrpc: "2.0",
-                method: "eth_getTransactionReceipt",
-                params: [hash],
-                id: 1,
-            }),
-        })
+    // DEPRECATED, unless required again
+    // public static async getCustomReceipt(url: string, hash: string): Promise<any> {
+    //     const response = await Utils.fetch(url, {
+    //         method: "POST",
+    //         headers: {
+    //             "Content-Type": "application/json",
+    //         },
+    //         body: JSON.stringify({
+    //             jsonrpc: "2.0",
+    //             method: "eth_getTransactionReceipt",
+    //             params: [hash],
+    //             id: 1,
+    //         }),
+    //     })
 
-        return response.result
-    }
+    //     return response.result
+    // }
 
     public static async getBatchCustomReceipts(url: string, hashes: string[]): Promise<any> {
         const response = await Utils.fetch(url, {

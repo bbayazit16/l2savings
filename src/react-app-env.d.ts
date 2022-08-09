@@ -48,7 +48,7 @@ interface TransactionSavingsLocalized {
 }
 
 interface CalcProgress {
-    text: "Fetching transaction receipts" | "Calculating savings",
+    text: "Fetching transaction receipts" | "Calculating fees" | "Calculated savings",
     current: number
     total?: number
 }

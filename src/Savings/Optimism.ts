@@ -146,7 +146,7 @@ export default class Optimism implements L2 {
             transactionsCalculated++
 
             this.onSavingCalculated({
-                text: "Calculating savings",
+                text: "Calculating fees",
                 current: transactionsCalculated,
                 total: flatReceipts.length,
             })
@@ -167,7 +167,7 @@ export default class Optimism implements L2 {
         }
 
         this.onSavingCalculated({
-            text: "Calculating savings",
+            text: "Calculated savings",
             current: transactionsCalculated,
             total: transactionsCalculated,
         })
