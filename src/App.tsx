@@ -65,14 +65,7 @@ const App = () => {
     }
 
     useEffect(() => {
-        if (account.address) {
-            calculateAllSavings(account.address)
-        } else {
-            setOptimismSavingsCalculated(Utils.noProgress)
-            setArbitrumSavingsCalculated(Utils.noProgress)
-            setZkSyncSavingsCalculated(Utils.noProgress)
-            setAllSavings(undefined)
-        }
+        if (account.address) calculateAllSavings(account.address)
     }, [account.address])
 
     useEffect(() => {
@@ -80,7 +73,12 @@ const App = () => {
     }, [])
 
     useEffect(() => {
-        Utils.listenAccountChanges(setAccount)
+        Utils.listenAccountChanges(setAccount, () => {
+            setOptimismSavingsCalculated(Utils.noProgress)
+            setArbitrumSavingsCalculated(Utils.noProgress)
+            setZkSyncSavingsCalculated(Utils.noProgress)
+            setAllSavings(undefined)
+        })
     }, [window.ethereum])
 
     return (

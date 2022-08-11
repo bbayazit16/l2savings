@@ -402,7 +402,10 @@ export default class Utils {
         }
     }
 
-    public static listenAccountChanges(setAccount: (account: Account) => void) {
+    public static listenAccountChanges(
+        setAccount: (account: Account) => void,
+        resetSavings: () => void
+    ) {
         if (!window.ethereum) {
             return
         }
@@ -411,12 +414,12 @@ export default class Utils {
             if (accounts.length !== 0) {
                 Utils.safeConnect(setAccount)
             } else {
-                Utils._disconnectWallet(setAccount)
+                Utils._disconnectWallet(setAccount, resetSavings)
             }
         })
 
         window.ethereum.on("disconnect", () => {
-            Utils._disconnectWallet(setAccount)
+            Utils._disconnectWallet(setAccount, resetSavings)
         })
     }
 
@@ -578,9 +581,14 @@ export default class Utils {
         })
     }
 
-    private static _disconnectWallet(setAccount: (account: Account) => void) {
+    private static _disconnectWallet(
+        setAccount: (account: Account) => void,
+        resetSavings: () => void
+    ) {
         Utils.connected = false
+
         setAccount({ address: undefined })
+        resetSavings()
 
         localStorage.removeItem("connectionType")
 
