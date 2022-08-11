@@ -82,6 +82,7 @@ yarn install
 _Make sure you are on the root directory and have yarn installed._
 
 Create .env file and add environment variables (by referring to .env.example)
+Make sure RPCs support batch JSON RPC requests.
 
 Modify .env.development to change default development RPCs
 
@@ -94,6 +95,7 @@ yarn dev
 _Make sure you are on the root directory and have yarn installed._
 
 Create .env file and add environment variables (by referring to .env.example)
+Make sure RPCs support batch JSON RPC requests.
 
 ```sh
 yarn build
@@ -119,8 +121,9 @@ serve -s build
 
 [AGPL-3.0-only](LICENSE)
 
-## Made Possible Thanks To
+## Special Thanks To
 
 - @download/blockies for blockies identicons
 - Ethers, Etherscan, Optimistic Etherscan, Arbiscan, ZkSync API's
-- David Mihal's Ethereum Average Fees Subgraph
+- David Mihal for the Ethereum Average Fees Subgraph
+- @shreykeny for suggesting me to use batch requests

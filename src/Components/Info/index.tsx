@@ -5,11 +5,12 @@ import { useEffect, useRef } from "react"
 interface IInfo {
     title: string
     text: string
+    subtitle: string
     completionTitle?: string
     disappear: boolean
 }
 
-const Info = ({ title, text, disappear, completionTitle }: IInfo) => {
+const Info = ({ title, subtitle, text, disappear, completionTitle }: IInfo) => {
     const boxRef = useRef() as React.MutableRefObject<HTMLDivElement>
     const spinnerRef = useRef() as React.MutableRefObject<HTMLDivElement>
 
@@ -36,12 +37,17 @@ const Info = ({ title, text, disappear, completionTitle }: IInfo) => {
         >
             <span className="text-lg md:text-xl">{disappear ? completionTitle : title}</span>
             <div ref={spinnerRef} className="flex flex-row space-x-2">
-                <span className="text-md md:text-lg">{text}</span>
-                <img
-                    src={spinner}
-                    alt="fetching transactions"
-                    className="animate-spin ml-1 mr-3 h-6 w-6 m-auto"
-                />
+                <div className="flex flex-col">
+                    <span className="text-md md:text-lg">{subtitle}</span>
+                    <div className="flex flex-row">
+                        <span className="text-md md:text-lg">{text}</span>
+                        <img
+                            src={spinner}
+                            alt="Fetching transactions"
+                            className="animate-spin ml-1 mr-3 h-6 w-6 m-auto"
+                        />
+                    </div>
+                </div>
             </div>
             <div className="flex absolute -top-2 -right-2 opacity-100 rounded-full h-4 w-4 bg-red-500 cursor-pointer">
                 <span

@@ -2,7 +2,7 @@ import Utils from "../../Utils"
 
 import triangle from "../../Assets/Image/triangle.svg"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 
 interface ITransactionBox {
     savings: AllSavings
@@ -56,47 +56,53 @@ const TransactionBox = ({ savings, viewing }: ITransactionBox) => {
 
     const { details } = localizedSavings[viewing]
 
-    const body = Utils.sortBy(
-        details,
-        sortBy.key,
-        sortBy.key === "hash" || sortBy.key === "L2"
-    ).map((transaction, index) => (
-        <tr key={index}>
-            <td className="text-left p-4">
-                <img
-                    className={[
-                        "rounded-full",
-                        "select-none",
-                        "h-4",
-                        "w-4",
-                        "mr-1",
-                        "overflow-hidden",
-                        "h-fit",
-                        "md:w-8",
-                    ]
-                        .concat(transaction.L2 === "optimism" ? ["border-black", "border-2"] : [])
-                        .join(" ")}
-                    alt="L2 logo"
-                    src={Utils.chainToAsset(transaction.L2)}
-                />
-            </td>
-            <td className="text-left text-xl p-4 underline text-blue-400">
-                <a
-                    href={`${Utils.explorerURI(transaction.L2)}/tx/${transaction.hash}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    {Utils.truncateTransactionHash(transaction.hash)}
-                </a>
-            </td>
-            <td className="text-left text-xl p-4">{transaction.L2Fee}Ξ</td>
-            <td className="text-left text-xl p-4">{transaction.L1Fee}Ξ</td>
-            <td className="text-left text-xl p-4">{transaction.saved}Ξ</td>
-            <td className="text-left text-xl p-4">
-                {parseFloat(transaction.timesCheaper).toFixed(1).toLocaleString()}x
-            </td>
-        </tr>
-    ))
+    const body = useMemo(
+        () =>
+            Utils.sortBy(details, sortBy.key, sortBy.key === "hash" || sortBy.key === "L2").map(
+                (transaction, index) => (
+                    <tr key={index}>
+                        <td className="text-left p-4">
+                            <img
+                                className={[
+                                    "rounded-full",
+                                    "select-none",
+                                    "h-4",
+                                    "w-4",
+                                    "mr-1",
+                                    "overflow-hidden",
+                                    "md:h-8",
+                                    "md:w-8",
+                                ]
+                                    .concat(
+                                        transaction.L2 === "optimism"
+                                            ? ["border-black", "border-2"]
+                                            : []
+                                    )
+                                    .join(" ")}
+                                alt="L2 logo"
+                                src={Utils.chainToAsset(transaction.L2)}
+                            />
+                        </td>
+                        <td className="text-left text-xl p-4 underline text-blue-400">
+                            <a
+                                href={`${Utils.explorerURI(transaction.L2)}/tx/${transaction.hash}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                {Utils.truncateTransactionHash(transaction.hash)}
+                            </a>
+                        </td>
+                        <td className="text-left text-xl p-4">{transaction.L2Fee}Ξ</td>
+                        <td className="text-left text-xl p-4">{transaction.L1Fee}Ξ</td>
+                        <td className="text-left text-xl p-4">{transaction.saved}Ξ</td>
+                        <td className="text-left text-xl p-4">
+                            {parseFloat(transaction.timesCheaper).toFixed(1).toLocaleString()}x
+                        </td>
+                    </tr>
+                )
+            ),
+        [sortBy, details]
+    )
 
     const getTableHeader = (key: keyof TransactionSavingsLocalized, text: string) => {
         return (

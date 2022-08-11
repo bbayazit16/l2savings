@@ -27,9 +27,10 @@ const BRIDGE_TO_L2S = [
 interface INavbar {
     account: Account
     setAccount: (account: Account) => void
+    resetSavings: () => void
 }
 
-const Navbar = ({ account, setAccount }: INavbar) => {
+const Navbar = ({ account, setAccount, resetSavings }: INavbar) => {
     const [expandConnectWallet, setExpandConnectWallet] = useState<boolean>(false)
 
     return (
@@ -51,6 +52,12 @@ const Navbar = ({ account, setAccount }: INavbar) => {
                             text={account.displayAddress}
                             image={account.profilePhoto}
                             showCircularBorder={true}
+                            hover={[
+                                {
+                                    display: "Disconnect",
+                                    onClick: () => Utils.disconnectWallet(setAccount, resetSavings),
+                                },
+                            ]}
                             rotate={true}
                         />
                     ) : expandConnectWallet ? (
@@ -111,6 +118,12 @@ const Navbar = ({ account, setAccount }: INavbar) => {
                             text={account.displayAddress}
                             image={account.profilePhoto}
                             showCircularBorder={true}
+                            hover={[
+                                {
+                                    display: "Disconnect",
+                                    onClick: () => Utils.disconnectWallet(setAccount, resetSavings),
+                                },
+                            ]}
                             rotate={true}
                         />
                     ) : expandConnectWallet ? (
@@ -169,6 +182,12 @@ const Navbar = ({ account, setAccount }: INavbar) => {
                             text={account.displayAddress}
                             image={account.profilePhoto}
                             showCircularBorder={true}
+                            hover={[
+                                {
+                                    display: "Disconnect",
+                                    onClick: () => Utils.disconnectWallet(setAccount, resetSavings),
+                                },
+                            ]}
                             rotate={true}
                         />
                     ) : expandConnectWallet ? (

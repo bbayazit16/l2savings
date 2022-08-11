@@ -124,6 +124,7 @@ export default class ZkSync implements L2 {
 
             if (transactions.length === 0 && fetchedTxCount === 0) {
                 this.onSavingCalculated({
+                    text: "Calculated savings",
                     current: 0,
                     total: 0,
                 })
@@ -169,6 +170,7 @@ export default class ZkSync implements L2 {
         }
 
         this.onSavingCalculated({
+            text: "Fetching transaction receipts",
             current: 0,
             total: totalTransactionsLength,
         })
@@ -242,6 +244,7 @@ export default class ZkSync implements L2 {
                             transactionsCalculated++
 
                             this.onSavingCalculated({
+                                text: "Calculating fees",
                                 current: transactionsCalculated,
                                 total: totalTransactionsLength,
                             })
@@ -283,6 +286,7 @@ export default class ZkSync implements L2 {
                     transactionsCalculated++
 
                     this.onSavingCalculated({
+                        text: "Calculating fees",
                         current: transactionsCalculated,
                         total: totalTransactionsLength,
                     })
@@ -320,8 +324,12 @@ export default class ZkSync implements L2 {
                     transactionsCalculated++
 
                     this.onSavingCalculated({
+                        text: "Calculating fees",
                         current: transactionsCalculated,
-                        total: totalTransactionsLength,
+                        total:
+                            totalTransactionsLength > transactionsCalculated
+                                ? totalTransactionsLength
+                                : transactionsCalculated,
                     })
 
                     allSavings.push({
@@ -341,6 +349,7 @@ export default class ZkSync implements L2 {
         }
 
         this.onSavingCalculated({
+            text: "Calculated savings",
             current: allSavings.length,
             total: allSavings.length,
         })

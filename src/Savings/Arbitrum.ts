@@ -115,11 +115,17 @@ export default class Arbitrum implements L2 {
         const transactions = await this.getAllTransactions()
 
         this.onSavingCalculated({
+            text: "Fetching transaction receipts",
             current: 0,
             total: transactions.length,
         })
 
         if (transactions.length == 0) {
+            this.onSavingCalculated({
+                text: "Calculated savings",
+                current: 0,
+                total: 0,
+            })
             return Utils.noSavings
         }
 
@@ -131,16 +137,52 @@ export default class Arbitrum implements L2 {
         let totalL1GasPredicted = 0
         let totalL2GasSpent = 0
 
+        // Chunk receipts into batches of 5 (to avoid hitting api limits)
+        const chunkSize = transactions.length > 1_000 ? 10 : 5
+
+        let onChunk = 0
+        const receipts = await Promise.all(
+            Utils.chunk(transactions, chunkSize).map(async chunk => {
+                const receipts = await Utils.getBatchCustomReceipts(
+                    process.env.REACT_APP_ARBITRUM_RPC!,
+                    chunk.map(chunk_1 => chunk_1.hash)
+                )
+                onChunk += chunk.length
+                this.onSavingCalculated({
+                    text: "Fetching transaction receipts",
+                    current: onChunk,
+                    total: transactions.length,
+                })
+                return {
+                    receipts,
+                    methods: chunk.map(ch => ch.method),
+                }
+            })
+        )
+
+        const flatReceipts = receipts
+            .map(({ receipts, methods }) => {
+                return receipts.map((receipt: any, index: number) => {
+                    return {
+                        receipt,
+                        method: methods[index],
+                    }
+                })
+            })
+            .flat()
+            .filter(receipt => receipt.receipt !== null && receipt.receipt !== undefined)
+
+        this.onSavingCalculated({
+            text: "Fetching transaction receipts",
+            current: 0,
+            total: flatReceipts.length,
+        })
+
         let transactionsCalculated = 0
-        for (const { hash, method } of transactions) {
+        for (const { receipt, method } of flatReceipts) {
             if (!Utils.connected) {
                 throw new Error("Cancelled")
             }
-
-            const receipt: any = await Utils.getCustomReceipt(
-                process.env.REACT_APP_ARBITRUM_RPC!,
-                hash
-            )
 
             const paid: any = receipt.feeStats.paid
 
@@ -160,13 +202,14 @@ export default class Arbitrum implements L2 {
             transactionsCalculated++
 
             this.onSavingCalculated({
+                text: "Calculating fees",
                 current: transactionsCalculated,
                 total: transactions.length,
             })
 
             allSavings.push({
                 L2: "arbitrum",
-                hash,
+                hash: receipt.transactionHash,
                 L2Fee,
                 L1Fee,
                 saved: L1Fee - L2Fee,
@@ -179,6 +222,12 @@ export default class Arbitrum implements L2 {
             totalL1GasPredicted += L1Gas
             totalL2GasSpent += L2Gas
         }
+
+        this.onSavingCalculated({
+            text: "Calculated savings",
+            current: transactionsCalculated,
+            total: transactionsCalculated,
+        })
 
         const totalL1FeesUsd = await Utils.ethToUsd(totalL1Fees)
         const totalL2FeesUsd = await Utils.ethToUsd(totalL2Fees)
@@ -243,7 +292,7 @@ export default class Arbitrum implements L2 {
     private getL1Gas(L2Gas: number, method: string): number {
         switch (true) {
             case method === "" && L2Gas >= 450_000:
-                // Calculate amount based on gas, not transaction input
+                // Calculate the amount based on gas, not transaction input
                 return this.getL1Gas(L2Gas, "!")
             case method.includes("transfer"):
                 return this.gasMap.get("transfer")!

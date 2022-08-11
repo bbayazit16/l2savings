@@ -56,7 +56,10 @@ export default class Utils {
 
     public static connected: boolean = false
 
-    public static readonly noProgress = {
+    private static hasAlert: boolean = false
+
+    public static readonly noProgress: CalcProgress = {
+        text: "Fetching transaction receipts",
         current: 0,
         total: undefined,
     }
@@ -252,44 +255,84 @@ export default class Utils {
             return { ok: false, status: 404, json: () => {} }
         })
 
-        if (totalRetries === 5 && !failed) {
-            alert(
-                "Api endpoints receiving too many requests at the moment. Consider trying again later."
-            )
+        if (totalRetries === 16 && !failed) {
+            if (!Utils.hasAlert) {
+                Utils.hasAlert = true
+                alert(
+                    "Api endpoints receiving too many requests at the moment. Consider trying again later."
+                )
+            }
             throw new Error(`Failed to fetch: 429 Too Many Requests ${url}`)
         } else if (totalRetries === 5 && failed) {
-            alert(
-                "Network error! One of the services used may be down. Consider trying again later."
-            )
+            if (!Utils.hasAlert) {
+                Utils.hasAlert = true
+                alert(
+                    "Network error! One of the services used may be down. Consider trying again later."
+                )
+            }
             throw new Error(`Failed to fetch ${url}`)
         }
 
         if (response.status === 429) {
-            await new Promise(p => setTimeout(p, 1000 * (totalRetries + 1)))
-            return Utils.fetch(url, {}, totalRetries + 1)
+            await new Promise(p => setTimeout(p, 1536 * (totalRetries + 1)))
+            return Utils.fetch(url, params, totalRetries + 1)
         } else if (!response.ok) {
-            await new Promise(p => setTimeout(p, 500 * (totalRetries + 1)))
-            return Utils.fetch(url, {}, totalRetries + 1, true)
+            await new Promise(p => setTimeout(p, 1536 * (totalRetries + 1)))
+            return Utils.fetch(url, params, totalRetries + 1, true)
         }
 
         return await response.json()
     }
 
-    public static async getCustomReceipt(url: string, hash: string): Promise<any> {
+    // DEPRECATED, until required again
+    //
+    //
+    // public static async getCustomReceipt(url: string, hash: string): Promise<any> {
+    //     const response = await Utils.fetch(url, {
+    //         method: "POST",
+    //         headers: {
+    //             "Content-Type": "application/json",
+    //         },
+    //         body: JSON.stringify({
+    //             jsonrpc: "2.0",
+    //             method: "eth_getTransactionReceipt",
+    //             params: [hash],
+    //             id: 1,
+    //         }),
+    //     })
+
+    //     return response.result
+    // }
+
+    public static async getBatchCustomReceipts(url: string, hashes: string[]): Promise<any> {
         const response = await Utils.fetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-                jsonrpc: "2.0",
-                method: "eth_getTransactionReceipt",
-                params: [hash],
-                id: 1,
-            }),
+            body: JSON.stringify(
+                hashes.map((hash, index) => ({
+                    jsonrpc: "2.0",
+                    method: "eth_getTransactionReceipt",
+                    params: [hash],
+                    id: index,
+                }))
+            ),
         })
+        // Wait for two seconds after batch requests to avoid limits
+        await new Promise(p => setTimeout(p, 2000))
 
-        return response.result
+        return response.map((res: any) => res.result)
+    }
+
+    public static chunk<T>(array: T[], size: number): T[][] {
+        const chunks = []
+
+        for (let i = 0; i < array.length; i += size) {
+            chunks.push(array.slice(i, i + size))
+        }
+
+        return chunks
     }
 
     public static async connectWallet(
@@ -367,7 +410,10 @@ export default class Utils {
         }
     }
 
-    public static listenAccountChanges(setAccount: (account: Account) => void) {
+    public static listenAccountChanges(
+        setAccount: (account: Account) => void,
+        resetSavings: () => void
+    ) {
         if (!window.ethereum) {
             return
         }
@@ -376,13 +422,30 @@ export default class Utils {
             if (accounts.length !== 0) {
                 Utils.safeConnect(setAccount)
             } else {
-                Utils._disconnectWallet(setAccount)
+                Utils.disconnectWallet(setAccount, resetSavings)
             }
         })
 
         window.ethereum.on("disconnect", () => {
-            Utils._disconnectWallet(setAccount)
+            Utils.disconnectWallet(setAccount, resetSavings)
         })
+    }
+
+    public static disconnectWallet(
+        setAccount: (account: Account) => void,
+        resetSavings: () => void
+    ) {
+        Utils.connected = false
+
+        setAccount({ address: undefined })
+        resetSavings()
+
+        localStorage.removeItem("connectionType")
+
+        if (window.tempEthereum) {
+            window.ethereum = window.tempEthereum
+            window.tempEthereum = undefined
+        }
     }
 
     // Converts strings to float during sort, unless otherwise specified by
@@ -541,17 +604,5 @@ export default class Utils {
             displayAddress: ENS || account.displayAddress,
             profilePhoto: profilePhoto,
         })
-    }
-
-    private static _disconnectWallet(setAccount: (account: Account) => void) {
-        Utils.connected = false
-        setAccount({ address: undefined })
-
-        localStorage.removeItem("connectionType")
-
-        if (window.tempEthereum) {
-            window.ethereum = window.tempEthereum
-            window.tempEthereum = undefined
-        }
     }
 }
