@@ -138,24 +138,23 @@ export default class Arbitrum implements L2 {
         let totalL2GasSpent = 0
 
         let onChunk = 0
-        // Chunk receipts into batches of 10 (to avoid hitting api limits)
+        // Chunk receipts into batches of 5 (to avoid hitting api limits)
         const receipts = await Promise.all(
-            Utils.chunk(transactions, 10).map(async chunk => {
-                return Utils.getBatchCustomReceipts(
+            Utils.chunk(transactions, 5).map(async chunk => {
+                const receipts = await Utils.getBatchCustomReceipts(
                     process.env.REACT_APP_ARBITRUM_RPC!,
-                    chunk.map(chunk => chunk.hash)
-                ).then(receipts => {
-                    onChunk += chunk.length
-                    this.onSavingCalculated({
-                        text: "Fetching transaction receipts",
-                        current: onChunk,
-                        total: transactions.length,
-                    })
-                    return {
-                        receipts,
-                        methods: chunk.map(chunk => chunk.method),
-                    }
+                    chunk.map(chunk_1 => chunk_1.hash)
+                )
+                onChunk += chunk.length
+                this.onSavingCalculated({
+                    text: "Fetching transaction receipts",
+                    current: onChunk,
+                    total: transactions.length,
                 })
+                return {
+                    receipts,
+                    methods: chunk.map(ch => ch.method),
+                }
             })
         )
 
@@ -291,7 +290,7 @@ export default class Arbitrum implements L2 {
     private getL1Gas(L2Gas: number, method: string): number {
         switch (true) {
             case method === "" && L2Gas >= 450_000:
-                // Calculate amount based on gas, not transaction input
+                // Calculate the amount based on gas, not transaction input
                 return this.getL1Gas(L2Gas, "!")
             case method.includes("transfer"):
                 return this.gasMap.get("transfer")!

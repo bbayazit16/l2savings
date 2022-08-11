@@ -311,7 +311,6 @@ export default class Utils {
                 }))
             ),
         })
-
         // Wait for two seconds after batch requests to avoid limits
         await new Promise(p => setTimeout(p, 2000))
 

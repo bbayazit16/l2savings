@@ -97,24 +97,23 @@ export default class Optimism implements L2 {
         let totalGasSpent = 0
 
         let onChunk = 0
-        // Chunk receipts into batches of 10 (to avoid hitting api limits)
+        // Chunk receipts into batches of 5 (to avoid hitting api limits)
         const receipts = await Promise.all(
-            Utils.chunk(transactions, 10).map(async chunk => {
-                return Utils.getBatchCustomReceipts(
+            Utils.chunk(transactions, 5).map(async chunk => {
+                const receipts = await Utils.getBatchCustomReceipts(
                     process.env.REACT_APP_OPTIMISM_RPC!,
-                    chunk.map(chunk => chunk.hash)
-                ).then(receipts => {
-                    onChunk += chunk.length
-                    this.onSavingCalculated({
-                        text: "Fetching transaction receipts",
-                        current: onChunk,
-                        total: transactions.length,
-                    })
-                    return {
-                        receipts,
-                        gasPrices: chunk.map(chunk => chunk.gasPrice),
-                    }
+                    chunk.map(chunk_1 => chunk_1.hash)
+                )
+                onChunk += chunk.length
+                this.onSavingCalculated({
+                    text: "Fetching transaction receipts",
+                    current: onChunk,
+                    total: transactions.length,
                 })
+                return {
+                    receipts,
+                    gasPrices: chunk.map(ch => ch.gasPrice),
+                }
             })
         )
 
