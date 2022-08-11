@@ -253,7 +253,7 @@ export default class Utils {
             return { ok: false, status: 404, json: () => {} }
         })
 
-        if (totalRetries === 5 && !failed) {
+        if (totalRetries === 10 && !failed) {
             alert(
                 "Api endpoints receiving too many requests at the moment. Consider trying again later."
             )
