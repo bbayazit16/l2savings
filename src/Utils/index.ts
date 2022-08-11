@@ -414,13 +414,30 @@ export default class Utils {
             if (accounts.length !== 0) {
                 Utils.safeConnect(setAccount)
             } else {
-                Utils._disconnectWallet(setAccount, resetSavings)
+                Utils.disconnectWallet(setAccount, resetSavings)
             }
         })
 
         window.ethereum.on("disconnect", () => {
-            Utils._disconnectWallet(setAccount, resetSavings)
+            Utils.disconnectWallet(setAccount, resetSavings)
         })
+    }
+
+    public static disconnectWallet(
+        setAccount: (account: Account) => void,
+        resetSavings: () => void
+    ) {
+        Utils.connected = false
+
+        setAccount({ address: undefined })
+        resetSavings()
+
+        localStorage.removeItem("connectionType")
+
+        if (window.tempEthereum) {
+            window.ethereum = window.tempEthereum
+            window.tempEthereum = undefined
+        }
     }
 
     // Converts strings to float during sort, unless otherwise specified by
@@ -579,22 +596,5 @@ export default class Utils {
             displayAddress: ENS || account.displayAddress,
             profilePhoto: profilePhoto,
         })
-    }
-
-    private static _disconnectWallet(
-        setAccount: (account: Account) => void,
-        resetSavings: () => void
-    ) {
-        Utils.connected = false
-
-        setAccount({ address: undefined })
-        resetSavings()
-
-        localStorage.removeItem("connectionType")
-
-        if (window.tempEthereum) {
-            window.ethereum = window.tempEthereum
-            window.tempEthereum = undefined
-        }
     }
 }

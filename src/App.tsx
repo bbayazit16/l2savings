@@ -38,6 +38,13 @@ const App = () => {
 
     const [allSavings, setAllSavings] = useState<AllSavings | undefined>()
 
+    const resetSavings = () => {
+        setOptimismSavingsCalculated(Utils.noProgress)
+        setArbitrumSavingsCalculated(Utils.noProgress)
+        setZkSyncSavingsCalculated(Utils.noProgress)
+        setAllSavings(undefined)
+    }
+
     const calculateAllSavings = async (address: string) => {
         const [optimismSavings, arbitrumSavings, zkSyncSavings] = await Promise.all([
             new Optimism(address, setOptimismSavingsCalculated).calculateSavings(),
@@ -73,17 +80,12 @@ const App = () => {
     }, [])
 
     useEffect(() => {
-        Utils.listenAccountChanges(setAccount, () => {
-            setOptimismSavingsCalculated(Utils.noProgress)
-            setArbitrumSavingsCalculated(Utils.noProgress)
-            setZkSyncSavingsCalculated(Utils.noProgress)
-            setAllSavings(undefined)
-        })
+        Utils.listenAccountChanges(setAccount, resetSavings)
     }, [window.ethereum])
 
     return (
         <div className="flex flex-col min-h-screen justify-between">
-            <Navbar account={account} setAccount={setAccount} />
+            <Navbar account={account} setAccount={setAccount} resetSavings={resetSavings} />
 
             <Routes>
                 <Route path="faq" element={<FAQ />} />
