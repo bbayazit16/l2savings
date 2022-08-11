@@ -274,10 +274,10 @@ export default class Utils {
         }
 
         if (response.status === 429) {
-            await new Promise(p => setTimeout(p, 1280 * (totalRetries + 1)))
+            await new Promise(p => setTimeout(p, 1536 * (totalRetries + 1)))
             return Utils.fetch(url, params, totalRetries + 1)
         } else if (!response.ok) {
-            await new Promise(p => setTimeout(p, 1280 * (totalRetries + 1)))
+            await new Promise(p => setTimeout(p, 1536 * (totalRetries + 1)))
             return Utils.fetch(url, params, totalRetries + 1, true)
         }
 

@@ -57,7 +57,7 @@ const Main = ({ savings }: { savings: AllSavings | undefined }) => {
                                             savings.all.saved.timesCheaper.toString()
                                         )
                                             .toFixed(1)
-                                            .toLocaleString()}x cheaper than L1 costs. See how much you've saved at L2Savings @L2Savings`
+                                            .toLocaleString()}x cheaper than L1 costs. See how much you've saved at @L2Savings`
                                     )}`}
                                     imageProperties="p-[0.15rem]"
                                 />
