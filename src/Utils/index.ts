@@ -56,6 +56,8 @@ export default class Utils {
 
     public static connected: boolean = false
 
+    private static hasAlert: boolean = false
+
     public static readonly noProgress: CalcProgress = {
         text: "Fetching transaction receipts",
         current: 0,
@@ -254,22 +256,28 @@ export default class Utils {
         })
 
         if (totalRetries === 10 && !failed) {
-            alert(
-                "Api endpoints receiving too many requests at the moment. Consider trying again later."
-            )
+            if (!Utils.hasAlert) {
+                Utils.hasAlert = true
+                alert(
+                    "Api endpoints receiving too many requests at the moment. Consider trying again later."
+                )
+            }
             throw new Error(`Failed to fetch: 429 Too Many Requests ${url}`)
         } else if (totalRetries === 5 && failed) {
-            alert(
-                "Network error! One of the services used may be down. Consider trying again later."
-            )
+            if (!Utils.hasAlert) {
+                Utils.hasAlert = true
+                alert(
+                    "Network error! One of the services used may be down. Consider trying again later."
+                )
+            }
             throw new Error(`Failed to fetch ${url}`)
         }
 
         if (response.status === 429) {
-            await new Promise(p => setTimeout(p, 1024 * (totalRetries + 1)))
+            await new Promise(p => setTimeout(p, 2048 * (totalRetries + 1)))
             return Utils.fetch(url, params, totalRetries + 1)
         } else if (!response.ok) {
-            await new Promise(p => setTimeout(p, 1024 * (totalRetries + 1)))
+            await new Promise(p => setTimeout(p, 2048 * (totalRetries + 1)))
             return Utils.fetch(url, params, totalRetries + 1, true)
         }
 
