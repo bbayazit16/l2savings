@@ -255,7 +255,7 @@ export default class Utils {
             return { ok: false, status: 404, json: () => {} }
         })
 
-        if (totalRetries === 10 && !failed) {
+        if (totalRetries === 16 && !failed) {
             if (!Utils.hasAlert) {
                 Utils.hasAlert = true
                 alert(
