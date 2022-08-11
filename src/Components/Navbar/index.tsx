@@ -118,6 +118,12 @@ const Navbar = ({ account, setAccount, resetSavings }: INavbar) => {
                             text={account.displayAddress}
                             image={account.profilePhoto}
                             showCircularBorder={true}
+                            hover={[
+                                {
+                                    display: "Disconnect",
+                                    onClick: () => Utils.disconnectWallet(setAccount, resetSavings),
+                                },
+                            ]}
                             rotate={true}
                         />
                     ) : expandConnectWallet ? (
@@ -176,6 +182,12 @@ const Navbar = ({ account, setAccount, resetSavings }: INavbar) => {
                             text={account.displayAddress}
                             image={account.profilePhoto}
                             showCircularBorder={true}
+                            hover={[
+                                {
+                                    display: "Disconnect",
+                                    onClick: () => Utils.disconnectWallet(setAccount, resetSavings),
+                                },
+                            ]}
                             rotate={true}
                         />
                     ) : expandConnectWallet ? (
