@@ -137,10 +137,12 @@ export default class Arbitrum implements L2 {
         let totalL1GasPredicted = 0
         let totalL2GasSpent = 0
 
-        let onChunk = 0
         // Chunk receipts into batches of 5 (to avoid hitting api limits)
+        const chunkSize = transactions.length > 1_000 ? 10 : 5
+
+        let onChunk = 0
         const receipts = await Promise.all(
-            Utils.chunk(transactions, 5).map(async chunk => {
+            Utils.chunk(transactions, chunkSize).map(async chunk => {
                 const receipts = await Utils.getBatchCustomReceipts(
                     process.env.REACT_APP_ARBITRUM_RPC!,
                     chunk.map(chunk_1 => chunk_1.hash)
