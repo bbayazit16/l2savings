@@ -5,89 +5,24 @@ import Utils from "../Utils"
  *
  * ======== Methodology ========
  *
- * Unlike Optimism, Arbitrum is not EVM equivalent. Arbitrum has a completely different
- * approach to gas usage.
+ * Arbitrum savings are only calculated for transactions after Arbitrum Nitro. This is because AVM had different
+ * gas costs for each instruction compared to the EVM.
  *
- * Each unit of gas in Arbitrum is called an "arbgas". Although it is possible to estimate, it
- * is not possible to directly compare arbgas with L1 gas. (Roughly divide arbgas by 10-20)
- *
- * Moreover AVM (Arbitrum Virtual Machine) has different gas costs for each EVM intsruction.
- * @see https://developer.offchainlabs.com/docs/avm_specification#instructions
- *
- * Arbgas concept will be removed with Arbitrum Nitro.
+ * Arbgas concept was removed with Arbitrum Nitro.
  * @see https://github.com/OffchainLabs/nitro/blob/master/docs/migration/dapp_migration.md#cool-new-stuff
  *
- * All of these factors make it hard to estimate the amount of savings. However, until Arbitrum nitro is
- * live, the following approach can be used:
+ * So,
  *
- * - For transactions with known signatures, use the hardcoded gas amount:
- * - 21,000 gas for ETH transfers,
- * - 50,000 gas for ERC20 swaps and approvals,
- * - 105,000 gas for swaps,
- * - 150,000 gas for multicall as it can be used for anything
- * - 200,000 gas for add/remove liquidity
- * - 100,000 gas for deposits/withdraw (to any protocol)
- * - 200,000 gas for purchase
- * - 150,000 gas for stake
+ * L2Gas = gasUsed
+ * L2Fee = L2Gas * effectiveGasPrice
  *
- * For other signatures, use the following formula:
+ * Gas if transaction was on L1:
+ * L1Gas = L2Gas - gasUsedForL1, because L2Gas includes L1 calldata gas.
  *
- * arbgas <= 450,000                21,000
- * 450,000 < arbgas <= 750,000      50,000 + arbgas / 100
- * else                             (arbgas / 8) + 21_000;
- *
- * These gas costs are only averages and do not provide accurate data, but an estimation.
- *
- *
- * Similar to Optimistic Etherscan, Arbiscan does not return the total fee paid for a transaction.
- * The formula for the total fee paid is the following:
- *
- * l1Transaction + l1Calldata + l2Storage + l2Computation
- *
- * which are all values found in an eth_getTransactionReceipt JSON RPC call.
- *
- * For the current L1 gas, l1Calldata price retrieved by the eth_getTransactionReceipt
- * can be used. It is currently set to 15% higher than L1 gas price, which means
- * it should be close enough to L1 fast gas price.
+ * L1Fees are calculated according to dmihal/ethereum-average-fees subgraph.
  *
  */
 export default class Arbitrum implements L2 {
-    /**
-     * Mapping for function signature => gas
-     */
-    private readonly gasMap: Map<string, number> = new Map([
-        ["", 21_000],
-        ["transfer", 50_000], // anything with "transfer"
-        ["approve", 50_000],
-        ["stake", 150_000], // anything with "stake"
-        ["swap", 105_000], // anything with "swap"
-        ["purchase", 200_000],
-        ["deposit", 100_000],
-        ["withdraw", 100_000], // anything with "withdraw"
-        ["withdraw", 100_000],
-        ["withdrawAndHarvest", 100_000],
-        ["multicall", 150_000],
-        ["addLiquidity", 200_000],
-        ["addLiquidityETH", 200_000],
-        ["addTokenLiquidity", 200_000],
-        ["closePosition", 200_000],
-        ["removeLiquidity", 200_000],
-        ["removeLiquidityETH", 200_000],
-        ["removeLiquidityWithPermit", 200_000],
-        ["removeLiquidityETHWithPermit", 200_000],
-        ["removeLiquidityETHSupportingFeeOnTransferTokens", 200_000],
-        ["removeLiquidityETHWithPermitSupportingFeeOnTransferTokens", 200_000],
-        ["swapExactTokensForTokens", 105_000],
-        ["swapTokensForExactTokens", 105_000],
-        ["swapExactETHForTokens", 105_000],
-        ["swapTokensForExactETH", 105_000],
-        ["swapExactTokensForETH", 105_000],
-        ["swapETHForExactTokens", 105_000],
-        ["swapExactTokensForTokensSupportingFeeOnTransferTokens", 105_000],
-        ["swapExactETHForTokensSupportingFeeOnTransferTokens", 105_000],
-        ["swapExactTokensForETHSupportingFeeOnTransferTokens", 105_000],
-    ])
-
     /**
      * The address that the data will be collected for
      */
@@ -155,17 +90,17 @@ export default class Arbitrum implements L2 {
                 })
                 return {
                     receipts,
-                    methods: chunk.map(ch => ch.method),
+                    timestamps: chunk.map(ch => ch.timestamp),
                 }
             })
         )
 
-        const flatReceipts = receipts
-            .map(({ receipts, methods }) => {
+        const flatReceipts: { receipt: any; timestamp: number }[] = receipts
+            .map(({ receipts, timestamps }) => {
                 return receipts.map((receipt: any, index: number) => {
                     return {
                         receipt,
-                        method: methods[index],
+                        timestamp: timestamps[index],
                     }
                 })
             })
@@ -178,26 +113,26 @@ export default class Arbitrum implements L2 {
             total: flatReceipts.length,
         })
 
+        Utils.cacheGasTimestamps(flatReceipts.map(receipt => receipt.timestamp))
+
         let transactionsCalculated = 0
-        for (const { receipt, method } of flatReceipts) {
+        for (const { receipt, timestamp } of flatReceipts) {
             if (!Utils.connected) {
                 throw new Error("Cancelled")
             }
 
-            const paid: any = receipt.feeStats.paid
-
+            // L2Gas including L1 calldata
             const L2Gas = parseInt(receipt.gasUsed, 16)
+
+            // Total fee paid on Arbitrum
             const L2Fee = Utils.weiToEther(
-                BigInt(paid.l1Transaction) +
-                    BigInt(paid.l1Calldata) +
-                    BigInt(paid.l2Storage) +
-                    BigInt(paid.l2Computation)
+                BigInt(receipt.gasUsed) * BigInt(receipt.effectiveGasPrice)
             )
 
-            const L1Gas = this.getL1Gas(L2Gas, method)
-            const L1Fee = Utils.weiToEther(
-                BigInt(L1Gas) * BigInt(receipt.feeStats.prices.l1Calldata)
-            )
+            // Total computation cost
+            const L1Gas = L2Gas - parseInt(receipt.gasUsedForL1, 16)
+
+            const L1Fee = await Utils.averageDailyFee(timestamp, L1Gas)
 
             transactionsCalculated++
 
@@ -258,12 +193,14 @@ export default class Arbitrum implements L2 {
     }
 
     /**
-     * @return all transactions hashes and their methods
+     * @return transaction hashes + timestamp of all trannsactions for address after Arbitrum nitro
      */
-    private async getAllTransactions(): Promise<{ hash: string; method: string }[]> {
+    private async getAllTransactions(): Promise<{ hash: string; timestamp: number }[]> {
+        // Get all transactions of address before Arbitrum Nitro (+- 4 hours)
         const transactions = await Utils.fetch(
-            `https://api.arbiscan.io/api?module=account&action=txlist&address=${this.address}&sort=desc&apikey=8PZFKWRJSCDH5SEJ6QP2DTM2QN6DK2Q1UV`
+            `https://api.arbiscan.io/api?module=account&action=txlist&address=${this.address}&startBlock=22213298&sort=desc&apikey=8PZFKWRJSCDH5SEJ6QP2DTM2QN6DK2Q1UV`
         )
+
         // Filter incoming transactions and remove:
         // - transactions that are not outgoing
         // - transactions that failed
@@ -279,37 +216,8 @@ export default class Arbitrum implements L2 {
             .map(transaction => {
                 return {
                     hash: transaction.hash,
-                    method: transaction.functionName.split("(")[0],
+                    timestamp: parseInt(transaction.timeStamp),
                 }
             })
-    }
-
-    /**
-     * @param L2Gas the amount of arbgas spent
-     * @param method the readable function signature
-     * @return estimated L1 gas
-     */
-    private getL1Gas(L2Gas: number, method: string): number {
-        switch (true) {
-            case method === "" && L2Gas >= 450_000:
-                // Calculate the amount based on gas, not transaction input
-                return this.getL1Gas(L2Gas, "!")
-            case method.includes("transfer"):
-                return this.gasMap.get("transfer")!
-            case method.includes("stake"):
-                return this.gasMap.get("stake")!
-            case method.includes("swap"):
-                return this.gasMap.get("swap")!
-            case method.includes("withdraw"):
-                return this.gasMap.get("withdraw")!
-            case this.gasMap.has(method):
-                return this.gasMap.get(method)!
-            case L2Gas <= 450_000:
-                return 21_000
-            case L2Gas <= 750_000:
-                return Math.round(50_000 + L2Gas / 100)
-            default:
-                return Math.round(L2Gas / 8 + 21_000)
-        }
     }
 }

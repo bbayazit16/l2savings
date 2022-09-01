@@ -22,6 +22,7 @@ interface Transaction {
     nonce: string
     gasUsed: string
     gasPrice: string
+    timeStamp: string
     blockNumber: string
     functionName: string
     txreceipt_status: "0" | "1"
@@ -48,7 +49,7 @@ interface TransactionSavingsLocalized {
 }
 
 interface CalcProgress {
-    text: "Fetching transaction receipts" | "Calculating fees" | "Calculated savings",
+    text: "Fetching transaction receipts" | "Calculating fees" | "Calculated savings"
     current: number
     total?: number
 }

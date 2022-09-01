@@ -81,6 +81,9 @@ const SavingsParagraph = ({ savings, viewing }: ISavingsParagraph) => {
                 {stat(total.usd, "usd", true)}. That's {stat(total.timesCheaper, "x", true)}{" "}
                 cheaper! {getEmoji("🤯")}
             </p>
+            {viewing === "arbitrum" && (
+                <p className="text-md">*Only transactions after Arbitrum Nitro are supported</p>
+            )}
         </div>
     )
 }

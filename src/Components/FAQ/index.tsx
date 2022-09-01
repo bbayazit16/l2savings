@@ -42,19 +42,12 @@ const FAQ = () => {
                     <br className="select-none" />
                     <h2 className="text-4xl text-[#4E9FEA]">Arbitrum</h2>
                     <p className="text-2xl leading-6 text-gray-300">
-                        Despite being an optimistic rollup, Arbitrum's approach to gas is
-                        considerably different than Ethereum's. Each unit of computation is called
-                        an "arbgas", a unit much cheaper than L1 gas. EVM instructions on Arbitrum
-                        have different gas costs compared to Ethereum, making it impossible to
-                        convert arbgas to L1 gas. Currently, L1 gas is estimated by the name of the
-                        function signature, and if the function signature is unknown arbgas is
-                        divided by 8. For more information on Arbitrum calculations, see the
-                        L2Savings Github.
-                        <br className="select-none" />
-                        <br className="select-none" />
-                        But good news: Scheduled for 31st of August, Arbitrum will migrate to Nitro,
-                        replacing arbgas with L1 equivalent gas that we're all used to. This will
-                        make it possible to make accurate calculations!
+                        After migrating to Nitro, Arbitrum replaced "arbgas" with L1 equivalent gas
+                        that we're all used to. L2Gas is a combination of L1 Calldata Gas + L2 Gas
+                        (which is equal to L1 computation!). To calculate the L1 gas price during
+                        the time of the transaction, the average daily gas price during the date of
+                        the transaction is used. Nitro upgrade not only made transactions cheaper,
+                        but it also made it easier and more accurate to calculate savings!
                     </p>
                     <br className="select-none" />
                     <h2 className="text-4xl text-[#4E5395]">ZkSync</h2>

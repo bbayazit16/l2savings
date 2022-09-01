@@ -8,7 +8,7 @@ import Utils from "../Utils"
  * Optimism is an optimistic rollup that is EVM equivalent, hence each L2 gas is equivalent
  * to an L1 gas.
  *
- * Since the Etherscan API does not return fees paid for a transsaction, it
+ * Since the Etherscan API does not return fees paid for a transaction, it
  * has to be calculated manually. Fees paid can be calculated using the following
  * formula:
  *

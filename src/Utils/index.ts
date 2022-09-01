@@ -53,6 +53,7 @@ export default class Utils {
 
     private static blockiesCache: Map<string, string> = new Map()
     private static ethPriceCache: Map<number, number> = new Map()
+    private static gasCache: Map<number, number> = new Map()
 
     public static connected: boolean = false
 
@@ -156,37 +157,48 @@ export default class Utils {
 
     public static async averageDailyFee(
         timestamp: number,
-        type: "swap" | "mint" | "ethTransfer" | "erc20Transfer"
+        type: "swap" | "mint" | "ethTransfer" | "erc20Transfer" | number
     ): Promise<number> {
+        const nTimestamp = Math.floor(timestamp / 86_400)
         let averageSwapFee: number
 
-        try {
-            averageSwapFee = parseFloat(
-                (
-                    await this.sdk.graph
-                        .query(
-                            "dmihal/ethereum-average-fees",
-                            `{dayStat(id:${Math.floor(timestamp / 86_400)}){averageSwapCostETH}}`
-                        )
-                        .catch(async err => {
-                            console.warn(
-                                `Error fetching average daily fee ${type} at ${Math.floor(
-                                    timestamp
-                                )}, returning current fee`
+        if (Utils.gasCache.has(nTimestamp)) {
+            averageSwapFee = Utils.gasCache.get(nTimestamp)!
+        } else {
+            try {
+                averageSwapFee = parseFloat(
+                    (
+                        await this.sdk.graph
+                            .query(
+                                "dmihal/ethereum-average-fees",
+                                `{dayStat(id:${nTimestamp}){averageSwapCostETH}}`
                             )
-                            const ethGasPrice = await Utils._fastGas()
-                            return { dayStat: { averageSwapCostETH: ethGasPrice * 105_000 } }
-                        })
-                ).dayStat.averageSwapCostETH
-            )
-        } catch {
-            console.warn(
-                `Average daily fee ${type} at ${Math.floor(
-                    timestamp
-                )} not found, returning current fee`
-            )
-            const ethGasPrice = await Utils._fastGas()
-            averageSwapFee = ethGasPrice * 105_000
+                            .catch(async () => {
+                                console.warn(
+                                    `Error fetching average daily fee ${type} at ${Math.floor(
+                                        timestamp
+                                    )}, returning current fee`
+                                )
+                                const ethGasPrice = await Utils._fastGas()
+                                return { dayStat: { averageSwapCostETH: ethGasPrice * 105_000 } }
+                            })
+                    ).dayStat.averageSwapCostETH
+                )
+            } catch {
+                console.warn(
+                    `Average daily fee ${type} at ${Math.floor(
+                        timestamp
+                    )} not found, returning current fee`
+                )
+                const ethGasPrice = await Utils._fastGas()
+                averageSwapFee = ethGasPrice * 105_000
+            }
+        }
+
+        Utils.gasCache.set(nTimestamp, averageSwapFee)
+
+        if (typeof type === "number") {
+            return (averageSwapFee / 105_000) * type
         }
 
         switch (type) {
@@ -198,6 +210,55 @@ export default class Utils {
                 return averageSwapFee
             case "mint":
                 return averageSwapFee * 2
+        }
+    }
+
+    public static async cacheGasTimestamps(timestamps: number[]) {
+        const seenTimestamps = new Set<number>()
+
+        let queryString = "{"
+        for (const timestamp of timestamps) {
+            const nTimestamp = Math.floor(timestamp / 86_400)
+
+            if (seenTimestamps.has(nTimestamp) || Utils.gasCache.has(nTimestamp)) {
+                continue
+            }
+
+            seenTimestamps.add(nTimestamp)
+
+            queryString += `x${nTimestamp}: dayStat(id: ${nTimestamp}) {averageSwapCostETH}`
+        }
+        queryString += "}"
+
+        let response: any
+        try {
+            response = await this.sdk.graph
+                .query("dmihal/ethereum-average-fees", queryString)
+                .catch(async () => {
+                    console.warn(
+                        "Error caching average daily fees, proceeding without average gas cache"
+                    )
+                    response = undefined
+                })
+        } catch {
+            response = undefined
+        }
+
+        if (!response) {
+            return
+        }
+
+        for (const key in response) {
+            const timestamp = parseInt(key.substring(1))
+
+            if (!response[key]) {
+                const ethGasPrice = await Utils._fastGas()
+                Utils.gasCache.set(timestamp, ethGasPrice * 105_000)
+                continue
+            }
+
+            const swapCost = parseFloat(response[key].averageSwapCostETH)
+            Utils.gasCache.set(timestamp, swapCost)
         }
     }
 
@@ -224,6 +285,8 @@ export default class Utils {
                     )
                     return {
                         dayStat: {
+                            // averageSwapCostETH is later divided to averageSwapCostUSD
+                            // so this works, although the variable namings are misleading
                             averageSwapCostETH: 1,
                             averageSwapCostUSD: await Utils._ethPrice(),
                         },
@@ -560,7 +623,7 @@ export default class Utils {
                 obj[key] = "0"
             } else {
                 if (typeof obj[key] === "number") {
-                    obj[key] = obj[key].toFixed(4).toLocaleString()
+                    obj[key] = obj[key].toFixed(5).toLocaleString()
                 } else {
                     obj[key] = obj[key].toLocaleString()
                 }

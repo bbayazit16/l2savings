@@ -185,6 +185,10 @@ export default class ZkSync implements L2 {
 
         const allSavings: TransactionSavings[] = []
 
+        Utils.cacheGasTimestamps(
+            reversedTransactions.map(tx => Math.round(new Date(tx.createdAt).getTime() / 1000))
+        )
+
         let transactionsCalculated = 0
         for (const transaction of reversedTransactions) {
             if (!Utils.connected) {
