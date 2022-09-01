@@ -81,10 +81,10 @@ yarn install
 
 _Make sure you are on the root directory and have yarn installed._
 
-Create .env file and add environment variables (by referring to .env.example)
+Create .env file and add environment variables (by referring to .env.development)
 Make sure RPCs support batch JSON RPC requests.
 
-Modify .env.development to change default development RPCs
+Modify .env.development to change the default development RPCs
 
 ```sh
 yarn dev
@@ -94,7 +94,7 @@ yarn dev
 
 _Make sure you are on the root directory and have yarn installed._
 
-Create .env file and add environment variables (by referring to .env.example)
+Create .env file and add environment variables (by referring to .env.development)
 Make sure RPCs support batch JSON RPC requests.
 
 ```sh
