@@ -53,8 +53,14 @@ const SavingsParagraph = ({ savings, viewing }: ISavingsParagraph) => {
     )
 
     const getEmoji = (emoji: string): string => {
-        return total.timesCheaper !== "..." ? (L2.feesSpent.ether === "0" ? "😐" : emoji) : "😴"
+        return L2.feesSpent.ether !== "..."
+            ? parseInt(L2.transactionsSent) === 0
+                ? "😐"
+                : emoji
+            : "😴"
     }
+
+    console.log(L2.transactionsSent)
 
     const mainnet = <span style={{ color: colorMap.mainnet }}>Ethereum Mainnet</span>
 
@@ -82,7 +88,9 @@ const SavingsParagraph = ({ savings, viewing }: ISavingsParagraph) => {
                 cheaper! {getEmoji("🤯")}
             </p>
             {viewing === "arbitrum" && (
-                <p className="text-md">*Only transactions after Arbitrum Nitro are supported</p>
+                <p className="text-md">
+                    *Only transactions sent after Arbitrum Nitro are supported
+                </p>
             )}
         </div>
     )
