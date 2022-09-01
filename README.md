@@ -39,27 +39,13 @@ For more info, see [the FAQ](https://l2savings.org/faq)
 
 ### Arbitrum
 
-[Arbitrum](https://arbitrum.io/) is not EVM equivalent, but EVM compatible. Due to it's design, the Arbitrum Virtual Machine (AVM) requires [a different approach to gas](https://developer.offchainlabs.com/docs/arbgas). Each unit is called an "arbgas".
+[Arbitrum](https://arbitrum.io/) is not EVM equivalent, but EVM compatible. Due to it's design, the Arbitrum Virtual Machine (AVM) require(d) [a different approach to gas](https://developer.offchainlabs.com/docs/arbgas). Each unit used to be referred to as "arbgas". However, with the Nitro upgrade, L2 instruction costs are now equivalavent to L1 instruction costs. L2Savings only supports transactions after the Arbitrum Nitro upgrade.
 
-> ArbGas is a measure of how long it takes for a validator to emulate execution of an AVM computation. This is scaled so that 100 million ArbGas is approximately equal to 1 second of CPU time on the Offchain Labs developer laptops in early 2020.
+L2Gas includes both the L2 computation cost and the L1 calldata gas cost. So:
 
-This principle makes it easy to calculate the total L2 transaction fee spent, (l2 gas \* l2 gas price), however makes it hard to estimate how much the transaction would cost if it was sent on Ethereum Mainnet. An Ether transfer typically costs around 420,000 gas, compared to Ethereum's 21,000 gas. Note that because L2 gas prices are low, it is cheaper to transfer Ether with 420,000 gas than 21,000 gas. In this case, gas is not a valid metric to compare transaction costs.
+L1Gas = L2Gas - gasUsedForL1
 
-- For transactions with known signatures, use the hardcoded gas amount:
-- 21,000 gas for ETH transfers,
-- 50,000 gas for ERC20 swaps and approvals,
-- 105,000 gas for swaps,
-- 150,000 gas for multicall as it can be used for anything
-- 200,000 gas for add/remove liquidity
-- 100,000 gas for deposits/withdraw (to any protocol)
-- 200,000 gas for purchase
-- 150,000 gas for stake
-
-For other signatures, use the following formula:
-
-- arbgas <= 450,000 == 21,000
-- 450,000 < arbgas <= 750,000  == 50,000 + arbgas / 100
-- else == (arbgas / 8) + 21_000;
+Similar to Optimism, all values can be found in the eth_getTransactionReceipt method. Later, L1Gas is multipled with average daily L1 gas price at the day of the transaction.
 
 ## ZkSync
 
