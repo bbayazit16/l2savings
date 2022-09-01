@@ -53,7 +53,7 @@ const SavingsParagraph = ({ savings, viewing }: ISavingsParagraph) => {
     )
 
     const getEmoji = (emoji: string): string => {
-        return total.timesCheaper !== "..." ? (total.timesCheaper === "0" ? "😐" : emoji) : "😴"
+        return total.timesCheaper !== "..." ? (L2.feesSpent.ether === "0" ? "😐" : emoji) : "😴"
     }
 
     const mainnet = <span style={{ color: colorMap.mainnet }}>Ethereum Mainnet</span>
