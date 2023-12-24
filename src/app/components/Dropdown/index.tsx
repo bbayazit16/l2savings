@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import Link from "next/link"
 
 interface IDropper {
     text: string
@@ -49,7 +49,7 @@ const Dropdown = ({ text, items }: IDropper) => {
                                         </a>
                                     ) : (
                                         <Link
-                                            to={dropperItem.to!}
+                                            href={dropperItem.to!}
                                             className="w-full h-full font-bold z-10"
                                         >
                                             {dropperItem.display}

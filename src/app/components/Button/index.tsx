@@ -1,4 +1,6 @@
-import { Link } from "react-router-dom"
+// import { Link } from "react-router-dom"
+
+import Link from "next/link"
 
 interface IButton {
     text: string
@@ -45,7 +47,7 @@ const Button = ({
             className="flex flex-row-reverse justify-center items-center bg-[#111824]
             rounded-2xl cursor-pointer border-[#1e2c42] border-[0.15rem] hover:scale-110 duration-500 select-none
             hover:bg-[#172e57] hover:border-[#1e2c42] w-auto h-auto"
-            to={path}
+            href={path}
         >
             {image ? (
                 <div

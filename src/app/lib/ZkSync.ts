@@ -1,4 +1,4 @@
-import Utils from "../Utils"
+import Utils from "./Utils"
 
 /**
  * ZkSync class calculates savings for ZkSync.

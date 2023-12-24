@@ -1,27 +1,21 @@
-import FetchingInfo from "./Components/FetchingContainer"
-import Footer from "./Components/Footer"
-import Navbar from "./Components/Navbar"
-import Main from "./Components/Main"
-import FAQ from "./Components/FAQ"
+"use client"
 
-import Utils from "./Utils"
-
-import Optimism from "./Savings/Optimism"
-import Arbitrum from "./Savings/Arbitrum"
-import ZkSync from "./Savings/ZkSync"
-
-import { Route, Routes } from "react-router-dom"
 import { useEffect, useState } from "react"
 
-/**
- * The logic for web app has not been documented.
- *
- * The code for savings calculations has been strictly documented.
- * @see Savings folder for the calculation documentations.
- * For any concerns, requests, or questions, open an issue at
- * @link https://github.com/bbayazit16/l2savings/issues
- */
-const App = () => {
+import Utils from "./lib/Utils"
+import Arbitrum from "./lib/Arbitrum"
+import Optimism from "./lib/Optimism"
+import ZkSync from "./lib/ZkSync"
+import FetchingInfo from "./components/FetchingContainer"
+import Footer from "./components/Footer"
+import Navbar from "./components/Navbar"
+
+export default function Home() {
+    // return (
+    //    <main className="flex-grow">
+
+    //    </main>
+    // )
     const [account, setAccount] = useState<Account>({ address: undefined })
 
     const [optimismSavingsCalculated, setOptimismSavingsCalculated] = useState<CalcProgress>(
@@ -84,13 +78,13 @@ const App = () => {
     }, [window.ethereum])
 
     return (
-        <div className="flex flex-col min-h-screen justify-between">
+        <div className="flex flex-grow flex-col min-h-screen justify-between">
             <Navbar account={account} setAccount={setAccount} resetSavings={resetSavings} />
 
-            <Routes>
+            {/* <Routes>
                 <Route path="faq" element={<FAQ />} />
                 <Route path="*" element={<Main savings={allSavings} />} />
-            </Routes>
+            </Routes> */}
 
             {account.address && (
                 <FetchingInfo
@@ -106,5 +100,3 @@ const App = () => {
         </div>
     )
 }
-
-export default App

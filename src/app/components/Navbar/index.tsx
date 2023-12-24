@@ -1,14 +1,9 @@
-import l2savings from "../../Assets/Image/l2savings.svg"
-import metamask from "../../Assets/Image/metamask.svg"
-import walletconnect from "../../Assets/Image/walletconnect.svg"
-
+import Link from "next/link"
 import Button from "../Button"
 import Dropdown from "../Dropdown"
 
-import Utils from "../../Utils"
-
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import Utils from "@/app/lib/Utils"
 
 const DISCOVER_L2S = [
     { display: "L2Beat", url: "https://l2beat.com/" },
@@ -37,10 +32,10 @@ const Navbar = ({ account, setAccount, resetSavings }: INavbar) => {
         <nav className="h-28 md:h-32 2xl:h-56 p-4 grow-0 select-none">
             <div className="flex h-full w-full pr-1 md:pr-4">
                 <div className="flex h-full w-16 md:w-1/6 md:flex 2xl:p-8">
-                    <Link to="/" className="hidden md:flex w-[40%]">
-                        <img className="m-auto h-full" src={l2savings} alt="L2Savings" />
+                    <Link href="/" className="hidden md:flex w-[40%]">
+                        <img className="m-auto h-full" src="/icons/l2savings.svg" alt="L2Savings" />
                     </Link>
-                    <Link to="/" className="flex h-full w-full md:w-[60%]">
+                    <Link href="/" className="flex h-full w-full md:w-[60%]">
                         <span className="font-bold text-md m-auto ml-1 md:text-2xl lg:ml-1 2xl:text-4xl">
                             L2Savings
                         </span>
@@ -69,7 +64,7 @@ const Navbar = ({ account, setAccount, resetSavings }: INavbar) => {
                                         setExpandConnectWallet(false)
                                     })
                                 }}
-                                image={metamask}
+                                image="/icons/metamask.svg"
                                 showCircularBorder={false}
                                 rotate={true}
                             />
@@ -80,7 +75,7 @@ const Navbar = ({ account, setAccount, resetSavings }: INavbar) => {
                                         setExpandConnectWallet(false)
                                     })
                                 }}
-                                image={walletconnect}
+                                image="/icons/walletconnect.svg"
                                 showCircularBorder={false}
                                 rotate={true}
                             />
@@ -135,7 +130,7 @@ const Navbar = ({ account, setAccount, resetSavings }: INavbar) => {
                                         setExpandConnectWallet(false)
                                     })
                                 }}
-                                image={metamask}
+                                image="/icons/metamask.svg"
                                 showCircularBorder={false}
                                 rotate={true}
                             />
@@ -146,7 +141,7 @@ const Navbar = ({ account, setAccount, resetSavings }: INavbar) => {
                                         setExpandConnectWallet(false)
                                     })
                                 }}
-                                image={walletconnect}
+                                image="/icons/walletconnect.svg"
                                 showCircularBorder={false}
                                 rotate={true}
                             />
@@ -199,7 +194,7 @@ const Navbar = ({ account, setAccount, resetSavings }: INavbar) => {
                                         setExpandConnectWallet(false)
                                     })
                                 }}
-                                image={metamask}
+                                image="/icons/metamask.svg"
                                 showCircularBorder={false}
                                 rotate={true}
                             />
@@ -210,7 +205,7 @@ const Navbar = ({ account, setAccount, resetSavings }: INavbar) => {
                                         setExpandConnectWallet(false)
                                     })
                                 }}
-                                image={walletconnect}
+                                image="/icons/walletconnect.svg"
                                 showCircularBorder={false}
                                 rotate={true}
                             />

@@ -1,5 +1,3 @@
-import spinner from "../../Assets/Image/spinner.svg"
-
 import { useEffect, useRef } from "react"
 
 interface IInfo {
@@ -42,7 +40,7 @@ const Info = ({ title, subtitle, text, disappear, completionTitle }: IInfo) => {
                     <div className="flex flex-row">
                         <span className="text-md md:text-lg">{text}</span>
                         <img
-                            src={spinner}
+                            src="/icons/spinner.svg"
                             alt="Fetching transactions"
                             className="animate-spin ml-1 mr-3 h-6 w-6 m-auto"
                         />

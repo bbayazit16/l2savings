@@ -1,4 +1,4 @@
-import Utils from "../Utils"
+import Utils from "./Utils"
 
 /**
  * Optimism class calculates savings for Optimism.

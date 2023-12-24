@@ -1,6 +1,3 @@
-import twitter from "../../Assets/Image/twitter.svg"
-import github from "../../Assets/Image/github.svg"
-
 import Button from "../Button"
 
 const Footer = () => {
@@ -18,7 +15,7 @@ const Footer = () => {
                     <Button
                         text="Twitter"
                         href="https://twitter.com/L2savings/"
-                        image={twitter}
+                        image="/icons/twitter.svg"
                         imageProperties="p-[0.15rem]"
                     />
                     <Button
@@ -26,7 +23,7 @@ const Footer = () => {
                         href="https://github.com/bbayazit16/l2savings/"
                         showCircularBorder={true}
                         rotate={true}
-                        image={github}
+                        image="/icons/github.svg"
                     />
                 </div>
 
@@ -35,7 +32,7 @@ const Footer = () => {
                     <Button
                         text="Twitter"
                         href="https://twitter.com/L2savings/"
-                        image={twitter}
+                        image="/icons/twitter.svg"
                         imageProperties="p-[0.15rem]"
                     />
                     <Button
@@ -43,7 +40,7 @@ const Footer = () => {
                         href="https://github.com/bbayazit16/l2savings/"
                         showCircularBorder={true}
                         rotate={true}
-                        image={github}
+                        image="/icons/github.svg"
                     />
                     <Button text="FAQ" path="faq" />
                 </div>
