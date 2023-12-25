@@ -8,5 +8,7 @@ export default function chainToAsset(chain: AvailableL2s): string {
             return "/arbitrum.svg"
         case "zkSyncLite":
             return "/zksync.svg"
+        case "linea":
+            return "/linea.svg"
     }
 }

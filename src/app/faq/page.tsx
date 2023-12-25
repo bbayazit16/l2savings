@@ -76,6 +76,16 @@ export default function Faq() {
                     for more details.
                 </p>
             </div>
+
+            <div>
+                <h2 className="text-4xl text-[#F04623]">Linea</h2>
+                <p>
+                    Similar to Optimism, savings are relatively accurate since each unit of L2 gas
+                    is equivalent to Ethereum&apos;s, thanks to EVM equivalence. However, just like
+                    Arbitrum, we have to calculate the average daily gas price during the date of
+                    the transaction to estimate the L1 fees.
+                </p>
+            </div>
         </main>
     )
 }

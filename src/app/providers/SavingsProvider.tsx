@@ -8,6 +8,7 @@ import useAccount from "../hooks/useAccount"
 import Optimism from "../lib/l2/Optimism"
 import Arbitrum from "../lib/l2/Arbitrum"
 import ZkSyncLite from "../lib/l2/ZkSyncLite"
+import Linea from "../lib/l2/Linea"
 
 interface SavingsContextProps {
     savings: AllSavings | undefined
@@ -30,6 +31,7 @@ export default function SavingsProvider({ children }: { children: React.ReactNod
         useState<CalcProgress>(noProgress)
     const [zkSyncLiteSavingsCalculated, setZkSyncLiteSavingsCalculated] =
         useState<CalcProgress>(noProgress)
+    const [lineaSavingsCalculated, setLineaSavingsCalculated] = useState<CalcProgress>(noProgress)
 
     const { account } = useAccount()
 
@@ -39,14 +41,16 @@ export default function SavingsProvider({ children }: { children: React.ReactNod
 
         setSavingsStartedFetching(true)
 
-        const [optimismSavings, arbitrumSavings, zkSyncLiteSavings] = await Promise.all([
+        const [optimismSavings, arbitrumSavings, zkSyncLiteSavings, lineaSavings] = await Promise.all([
             new Optimism(account.address, setOptimismSavingsCalculated).calculateSavings(),
             new Arbitrum(account.address, setArbitrumSavingsCalculated).calculateSavings(),
             new ZkSyncLite(account.address, setZkSyncLiteSavingsCalculated).calculateSavings(),
+            new Linea(account.address, setLineaSavingsCalculated).calculateSavings(),
         ]).catch(() => {
             setOptimismSavingsCalculated(noProgress)
             setArbitrumSavingsCalculated(noProgress)
             setZkSyncLiteSavingsCalculated(noProgress)
+            setLineaSavingsCalculated(noProgress)
             return [noSavings, noSavings, noSavings]
         })
 
@@ -60,6 +64,7 @@ export default function SavingsProvider({ children }: { children: React.ReactNod
             optimism: optimismSavings,
             arbitrum: arbitrumSavings,
             zkSyncLite: zkSyncLiteSavings,
+            linea: lineaSavings,
             all: savings,
         })
 
@@ -86,6 +91,7 @@ export default function SavingsProvider({ children }: { children: React.ReactNod
                     optimism: optimismSavingsCalculated,
                     arbitrum: arbitrumSavingsCalculated,
                     zkSyncLite: zkSyncLiteSavingsCalculated,
+                    linea: lineaSavingsCalculated,
                 },
                 savingsStartedFetching,
             }}

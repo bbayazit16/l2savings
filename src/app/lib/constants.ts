@@ -69,5 +69,9 @@ export const colorMap = {
         dataColor: "#6E73B8",
         chainColor: "#4E5395",
     },
+    linea: {
+        dataColor: "#F5A623",
+        chainColor: "#F04623",
+    },
     mainnet: "#6872ab",
 }

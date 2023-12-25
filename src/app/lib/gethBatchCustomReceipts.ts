@@ -15,7 +15,6 @@ export default async function getBatchCustomReceipts(url: string, hashes: string
             }))
         ),
     })
-    console.log("response", hashes, response)
     // Wait for two seconds after batch requests to avoid limits
     await new Promise(p => setTimeout(p, 2000))
 

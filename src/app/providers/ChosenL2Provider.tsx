@@ -1,7 +1,5 @@
 import { createContext, useState } from "react"
 
-type AvailableL2s = "all" | "optimism" | "arbitrum" | "zkSyncLite"
-
 interface ChosenL2Context {
     chosenL2: AvailableL2s
     setChosenL2: React.Dispatch<React.SetStateAction<AvailableL2s>>

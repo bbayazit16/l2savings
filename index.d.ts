@@ -22,7 +22,7 @@ interface Transaction {
     txreceipt_status: "0" | "1"
 }
 
-type AvailableL2s = "all" | "optimism" | "arbitrum" | "zkSyncLite"
+type AvailableL2s = "all" | "optimism" | "arbitrum" | "zkSyncLite" | "linea"
 
 interface TransactionSavings {
     L2: AvailableL2s
@@ -98,18 +98,12 @@ interface LocalizedSavings {
 
 type ZkSyncLiteTransaction = "Transfer" | "Swap" | "MintNFT"
 
-interface AllSavings {
-    all: Savings
-    optimism: Savings
-    arbitrum: Savings
-    zkSyncLite: Savings
+type AllSavings = {
+    [K in AvailableL2s]: Savaings
 }
 
-interface AllSavingsLocalized {
-    all: LocalizedSavings
-    optimism: LocalizedSavings
-    arbitrum: LocalizedSavings
-    zkSyncLite: LocalizedSavings
+type AllSavingsLocalized = {
+    [K in AvailableL2s]: LocalizedSavings
 }
 
 interface L2 {

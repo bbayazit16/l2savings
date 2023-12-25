@@ -8,5 +8,7 @@ export default function explorerUri(chain: AvailableL2s): string {
             return "https://arbiscan.io"
         case "zkSyncLite":
             return "https://zkscan.io"
+        case "linea":
+            return "https://lineascan.build"
     }
 }

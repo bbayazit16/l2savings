@@ -47,7 +47,7 @@ import getBatchCustomReceipts from "../gethBatchCustomReceipts"
  * to l1GasUsed * l1GasPrice * l1FeeScalar. All that needs to be done is to add l2fee to l1fee
  * to retreive total fee paid, where l2fee = (L2GasUsed * L2GasPrice).
  *
- * Finally, because each unit of L1 gas is equal to L2 gas, gasUsed * l1gasPrice retuns the
+ * Because each unit of L1 gas is equal to L2 gas, gasUsed * l1gasPrice retuns the
  * amount of fee that would be spent if the transaction was sent on L1 at the exact same date.
  */
 export default class Optimism implements L2 {
@@ -148,10 +148,6 @@ export default class Optimism implements L2 {
 
         let transactionsCalculated = 0
         for (const { receipt, gasPrice } of flatReceipts) {
-            // if (!Utils.connected) {
-            //     throw new Error("Cancelled")
-            // }
-
             const L2Fee = EthFees.weiToEther(
                 BigInt(receipt.gasUsed) * BigInt(gasPrice) + BigInt(receipt.l1Fee)
             )
@@ -220,7 +216,7 @@ export default class Optimism implements L2 {
      */
     private async getAllTransactions(): Promise<{ hash: string; gasPrice: string }[]> {
         const transactions = await customFetch(
-            `https://api-optimistic.etherscan.io/api?module=account&action=txlist&address=${this.address}&sort=desc&apikey=AUK6ZKXZXDDFJ5MYY8G287Z9D4D57SYVF8`
+            `https://api-optimistic.etherscan.io/api?module=account&action=txlist&address=${this.address}&sort=desc&apikey=${process.env.NEXT_PUBLIC_OPTIMISTIC_ETHERSCAN_API_KEY}`
         )
         // Filter incoming transactions and remove:
         // - transactions that are not outgoing

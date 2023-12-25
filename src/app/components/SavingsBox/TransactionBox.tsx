@@ -3,11 +3,11 @@
 import useChosenL2 from "@/app/hooks/useChosenL2"
 import useSavings from "@/app/hooks/useSavings"
 import explorerUri from "@/app/lib/explorerUri"
-import sortBy from "@/app/lib/sortby"
 import truncateTransactionHash from "@/app/lib/truncateTransactionHash"
-import clsx from "clsx"
 import ButtonImage from "../ButtonImage"
 import chainToAsset from "@/app/lib/chainToAssetSrc"
+import sortBy from "@/app/lib/sortBy"
+import clsx from "clsx"
 
 import { useState, useMemo } from "react"
 
@@ -135,6 +135,9 @@ function TableBody({
                             src={chainToAsset(transaction.L2)}
                             alt="L2 Logo"
                             border={transaction.L2 === "optimism"}
+                            className={clsx({
+                                "dark:invert": transaction.L2 === "linea",
+                            })}
                             animate
                         />
                     </td>

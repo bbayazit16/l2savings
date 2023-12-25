@@ -39,6 +39,7 @@ function SavingsProgress({
             {renderProgress("Arbitrum", progress.arbitrum)}
             {renderProgress("Optimism", progress.optimism)}
             {renderProgress("ZkSync Lite", progress.zkSyncLite)}
+            {renderProgress("Linea", progress.linea)}
         </div>
     )
 }
@@ -83,8 +84,12 @@ export default function SavingsBox() {
                     <ButtonImage src="/arbitrum.svg" alt="Arbitrum logo" animate />
                 </div>
                 <div className="flex flex-row space-x-2">
-                    <span>ZkSync Lite & Era</span>
+                    <span>ZkSync Lite</span>
                     <ButtonImage src="/zksync.svg" alt="ZkSync logo" animate />
+                </div>
+                <div className="flex flex-row space-x-2">
+                    <span>Linea</span>
+                    <ButtonImage src="/linea.svg" alt="Linea logo" className="dark:invert" animate />
                 </div>
             </div>
             <p>To get started, input your Ethereum address or ENS:</p> <EnterAddress />

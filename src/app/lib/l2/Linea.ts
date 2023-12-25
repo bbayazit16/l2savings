@@ -6,28 +6,21 @@ import EthFees from "../ethfees"
 import getBatchCustomReceipts from "../gethBatchCustomReceipts"
 
 /**
- * Arbitrum class calculates savings for Arbitrum.
+ * Linea class calculates savings for Linea.
  *
  * ======== Methodology ========
  *
- * Arbitrum savings are only calculated for transactions after Arbitrum Nitro. This is because AVM had different
- * gas costs for each instruction compared to the EVM.
+ * Linea is EVM equivalent to Ethereum, meaning that each unit of gas on Linea is
+ * equivalent to each unit of gas on Ethereum. Unlike Optimism, fees can be
+ * simply calculated by multiplying gasUsed by gasPrice.
  *
- * Arbgas concept was removed with Arbitrum Nitro.
- * @see https://github.com/OffchainLabs/nitro/blob/master/docs/migration/dapp_migration.md#cool-new-stuff
+ * Unlike Optimism, this time we cannot reliable get l1fee during the time of the transaction.
+ * So, we have to use the average daily fee instead.
  *
- * So,
- *
- * L2Gas = gasUsed
- * L2Fee = L2Gas * effectiveGasPrice
- *
- * Gas if transaction was on L1:
- * L1Gas = L2Gas - gasUsedForL1, because L2Gas includes L1 calldata gas.
- *
- * L1Fees are calculated according to dmihal/ethereum-average-fees subgraph.
- *
+ * Because each unit of L1 gas is equal to L2 gas, gasUsed * l1gasPrice retuns the
+ * amount of fee that would be spent if the transaction was sent on L1 at the exact same date.
  */
-export default class Arbitrum implements L2 {
+export default class Linea implements L2 {
     /**
      * The address that the data will be collected for
      */
@@ -74,8 +67,9 @@ export default class Arbitrum implements L2 {
         let totalL1Fees = 0
         let totalL2Fees = 0
 
-        let totalL1GasPredicted = 0
-        let totalL2GasSpent = 0
+        // The beauty of EVM equivalence is that each unit of L1 gas
+        // is equivalent to each unit of L2 gas :)
+        let totalGasSpent = 0
 
         // // Chunk receipts into batches of 5 (to avoid hitting api limits)
         // const chunkSize = transactions.length > 1_000 ? 10 : 5
@@ -87,9 +81,10 @@ export default class Arbitrum implements L2 {
         const receipts = await Promise.all(
             chunk(transactions, chunkSize).map(async chunk => {
                 const receipts = await getBatchCustomReceipts(
-                    process.env.NEXT_PUBLIC_ARBITRUM_RPC!,
+                    process.env.NEXT_PUBLIC_LINEA_RPC!,
                     chunk.map(chunk_1 => chunk_1.hash)
                 )
+
                 onChunk += chunk.length
                 this.onSavingCalculated({
                     text: "Fetching transaction receipts",
@@ -98,17 +93,17 @@ export default class Arbitrum implements L2 {
                 })
                 return {
                     receipts,
-                    timestamps: chunk.map(ch => ch.timestamp),
+                    gasPrices: chunk.map(ch => ch.gasPrice),
                 }
             })
         )
 
-        const flatReceipts: { receipt: any; timestamp: number }[] = receipts
-            .map(({ receipts, timestamps }) => {
+        const flatReceipts = receipts
+            .map(({ receipts, gasPrices }) => {
                 return receipts.map((receipt: any, index: number) => {
                     return {
                         receipt,
-                        timestamp: timestamps[index],
+                        gasPrice: gasPrices[index],
                     }
                 })
             })
@@ -121,33 +116,25 @@ export default class Arbitrum implements L2 {
             total: flatReceipts.length,
         })
 
-        EthFees.cacheGasTimestamps(flatReceipts.map(receipt => receipt.timestamp))
-
         let transactionsCalculated = 0
-        for (const { receipt, timestamp } of flatReceipts) {
-            // L2Gas including L1 calldata
+        for (const { receipt, gasPrice, timestamp } of flatReceipts) {
+            const L2Fee = EthFees.weiToEther(BigInt(receipt.gasUsed) * BigInt(gasPrice))
+
+            // evm equivalence
             const L2Gas = parseInt(receipt.gasUsed, 16)
 
-            // Total fee paid on Arbitrum
-            const L2Fee = EthFees.weiToEther(
-                BigInt(receipt.gasUsed) * BigInt(receipt.effectiveGasPrice)
-            )
-
-            // Total computation cost
-            const L1Gas = L2Gas - parseInt(receipt.gasUsedForL1, 16)
-
-            const L1Fee = await EthFees.averageDailyFee(timestamp, L1Gas)
+            const L1Fee = await EthFees.averageDailyFee(timestamp, L2Gas)
 
             transactionsCalculated++
 
             this.onSavingCalculated({
                 text: "Calculating fees",
                 current: transactionsCalculated,
-                total: transactions.length,
+                total: flatReceipts.length,
             })
 
             allSavings.push({
-                L2: "arbitrum",
+                L2: "linea",
                 hash: receipt.transactionHash,
                 L2Fee,
                 L1Fee,
@@ -158,8 +145,7 @@ export default class Arbitrum implements L2 {
             totalL1Fees += L1Fee
             totalL2Fees += L2Fee
 
-            totalL1GasPredicted += L1Gas
-            totalL2GasSpent += L2Gas
+            totalGasSpent += parseInt(receipt.gasUsed, 16)
         }
 
         this.onSavingCalculated({
@@ -173,7 +159,7 @@ export default class Arbitrum implements L2 {
 
         return {
             L1: {
-                gasSpent: totalL1GasPredicted,
+                gasSpent: totalGasSpent,
                 feesSpent: {
                     ether: totalL1Fees,
                     usd: totalL1FeesUsd,
@@ -181,7 +167,7 @@ export default class Arbitrum implements L2 {
             },
             L2: {
                 transactionsSent: transactions.length,
-                gasSpent: totalL2GasSpent,
+                gasSpent: totalGasSpent,
                 feesSpent: {
                     ether: totalL2Fees,
                     usd: totalL2FeesUsd,
@@ -197,14 +183,12 @@ export default class Arbitrum implements L2 {
     }
 
     /**
-     * @return transaction hashes + timestamp of all trannsactions for address after Arbitrum nitro
+     * @return all transaction hashes and their gas prices
      */
-    private async getAllTransactions(): Promise<{ hash: string; timestamp: number }[]> {
-        // Get all transactions of address before Arbitrum Nitro (+- 4 hours)
+    private async getAllTransactions(): Promise<{ hash: string; gasPrice: string }[]> {
         const transactions = await customFetch(
-            `https://api.arbiscan.io/api?module=account&action=txlist&address=${this.address}&startBlock=22213298&sort=desc&apikey=${process.env.NEXT_PUBLIC_ARBISCAN_API_KEY}`
+            `https://api.lineascan.build/api?module=account&action=txlist&address=${this.address}&sort=desc&apikey=${process.env.NEXT_PUBLIC_LINEASCAN_API_KEY}`
         )
-
         // Filter incoming transactions and remove:
         // - transactions that are not outgoing
         // - transactions that failed
@@ -220,7 +204,7 @@ export default class Arbitrum implements L2 {
             .map(transaction => {
                 return {
                     hash: transaction.hash,
-                    timestamp: parseInt(transaction.timeStamp),
+                    gasPrice: transaction.gasPrice,
                 }
             })
     }

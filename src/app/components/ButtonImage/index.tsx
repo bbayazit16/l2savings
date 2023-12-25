@@ -7,6 +7,7 @@ type ButtonImageProps = {
     rounded?: boolean
     border?: boolean
     animate?: boolean
+    className?: string
 }
 
 export default function ButtonImage({
@@ -14,6 +15,7 @@ export default function ButtonImage({
     alt,
     border = false,
     animate = false,
+    className,
 }: ButtonImageProps) {
     return (
         <div
@@ -25,7 +27,7 @@ export default function ButtonImage({
             )}
             style={{ contain: "layout" }}
         >
-            <Image src={src} alt={alt} fill />
+            <Image src={src} alt={alt} className={className} fill />
         </div>
     )
 }

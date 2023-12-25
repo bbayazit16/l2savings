@@ -25,9 +25,9 @@ export default function ChooseL2() {
                 <span>ZkSync Lite</span>
                 <ButtonImage src="/zksync.svg" alt="ZkSync logo" animate />
             </Button>
-            <Button>
-                <span>ZkSync Era</span>
-                <ButtonImage src="/zksync.svg" alt="ZkSync logo" animate />
+            <Button onClick={() => setChosenL2("linea")}>
+                <span>Linea</span>
+                <ButtonImage src="/linea.svg" alt="Linea logo" className="dark:invert" animate />
             </Button>
         </div>
     )

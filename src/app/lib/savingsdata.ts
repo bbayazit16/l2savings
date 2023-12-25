@@ -7,6 +7,7 @@ export default class SavingsData {
                 optimism: noSavingsLocalized,
                 arbitrum: noSavingsLocalized,
                 zkSyncLite: noSavingsLocalized,
+                linea: noSavingsLocalized,
                 all: noSavingsLocalized,
             }
         }

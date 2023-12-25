@@ -1,5 +1,3 @@
-type AvailableL2s = "all" | "optimism" | "arbitrum" | "zkSyncLite"
-
 export default function localizeChain(chain: AvailableL2s): string {
     switch (chain) {
         case "all":
@@ -10,5 +8,7 @@ export default function localizeChain(chain: AvailableL2s): string {
             return "Arbitrum"
         case "zkSyncLite":
             return "ZkSync Lite"
+        case "linea":
+            return "Linea"
     }
 }
