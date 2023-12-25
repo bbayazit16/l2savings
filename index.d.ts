@@ -1,15 +1,10 @@
 declare module "@download/blockies"
 
-interface Window {
-    ethereum?: any
-    tempEthereum?: any
-}
-
 interface Account {
-    address?: string
+    address: string
     ENS?: string
-    displayAddress?: string
-    profilePhoto?: string
+    displayAddress: string
+    profilePhoto: string
 }
 
 interface Transaction {
@@ -27,7 +22,7 @@ interface Transaction {
     txreceipt_status: "0" | "1"
 }
 
-type AvailableL2s = "all" | "optimism" | "arbitrum" | "zkSync"
+type AvailableL2s = "all" | "optimism" | "arbitrum" | "zkSyncLite"
 
 interface TransactionSavings {
     L2: AvailableL2s
@@ -101,20 +96,20 @@ interface LocalizedSavings {
     details: TransactionSavingsLocalized[]
 }
 
-type ZkSyncTransaction = "Transfer" | "Swap" | "MintNFT"
+type ZkSyncLiteTransaction = "Transfer" | "Swap" | "MintNFT"
 
 interface AllSavings {
     all: Savings
     optimism: Savings
     arbitrum: Savings
-    zkSync: Savings
+    zkSyncLite: Savings
 }
 
 interface AllSavingsLocalized {
     all: LocalizedSavings
     optimism: LocalizedSavings
     arbitrum: LocalizedSavings
-    zkSync: LocalizedSavings
+    zkSyncLite: LocalizedSavings
 }
 
 interface L2 {
