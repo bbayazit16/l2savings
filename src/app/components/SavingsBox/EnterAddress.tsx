@@ -46,6 +46,7 @@ export default function EnterAddress() {
         <form onSubmit={handleSubmit}>
             <div className="flex flex-row space-x-4 justify-center m-auto">
                 <input
+                    required
                     type="text"
                     value={inputValue}
                     onChange={handleInputChange}
@@ -56,6 +57,13 @@ export default function EnterAddress() {
                             : "border-zinc-800 dark:border-white"
                     }`}
                     placeholder={account?.displayAddress || "Enter Ethereum address or ENS name"}
+                    autoCapitalize="off"
+                    autoCorrect="off"
+                    autoComplete="off"
+                    aria-autocomplete="none"
+                    aria-label="Enter Ethereum address or ENS name"
+                    aria-invalid={isInvalid}
+                    aria-required="true"
                 />
                 <Button
                     type="submit"
