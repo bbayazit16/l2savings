@@ -1,6 +1,8 @@
 import { CryptoStatsSDK } from "@cryptostats/sdk"
 import { ethers } from "ethers"
 import provider from "./provider"
+import chunk from "./chunk"
+import getBatchL1FeeHistory from "./batchFeeHistory"
 
 export default class EthFees {
     private static gasCache: Map<number, number> = new Map()
@@ -98,6 +100,19 @@ export default class EthFees {
             case "mint":
                 return averageSwapFee * 2
         }
+    }
+
+    public static async getGasFeesAtBlocks(
+        l1Blocks: string[]
+    ): Promise<{ [blockNumber: string]: bigint }> {
+        const chunkSize = 10
+        const chunkedBlocks = chunk(l1Blocks, chunkSize)
+        const promises = chunkedBlocks.map(chunk => getBatchL1FeeHistory(chunk))
+
+        const results = await Promise.all(promises)
+        return results.reduce((acc, current) => {
+            return { ...acc, ...current }
+        }, {})
     }
 
     public static async cacheGasTimestamps(timestamps: number[]) {

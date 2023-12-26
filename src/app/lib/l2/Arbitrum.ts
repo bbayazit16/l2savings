@@ -66,7 +66,7 @@ export default class Arbitrum implements L2 {
                 current: 0,
                 total: 0,
             })
-            return noSavings
+            return JSON.parse(JSON.stringify(noSavings)) as Savings
         }
 
         const allSavings: TransactionSavings[] = []
@@ -113,7 +113,13 @@ export default class Arbitrum implements L2 {
                 })
             })
             .flat()
-            .filter(receipt => receipt.receipt !== null && receipt.receipt !== undefined)
+            .filter(
+                receipt =>
+                    receipt.receipt !== null &&
+                    receipt.receipt !== undefined &&
+                    receipt.receipt.l1BlockNumber !== null &&
+                    receipt.receipt.l1BlockNumber !== undefined
+            )
 
         this.onSavingCalculated({
             text: "Fetching transaction receipts",
@@ -121,7 +127,9 @@ export default class Arbitrum implements L2 {
             total: flatReceipts.length,
         })
 
-        EthFees.cacheGasTimestamps(flatReceipts.map(receipt => receipt.timestamp))
+        const l1Blocks = flatReceipts.map(receipt => receipt.receipt.l1BlockNumber)
+
+        const gasFeesAtL1Blocks = await EthFees.getGasFeesAtBlocks(l1Blocks)
 
         let transactionsCalculated = 0
         for (const { receipt, timestamp } of flatReceipts) {
@@ -133,10 +141,11 @@ export default class Arbitrum implements L2 {
                 BigInt(receipt.gasUsed) * BigInt(receipt.effectiveGasPrice)
             )
 
-            // Total computation cost
             const L1Gas = L2Gas - parseInt(receipt.gasUsedForL1, 16)
 
-            const L1Fee = await EthFees.averageDailyFee(timestamp, L1Gas)
+            const L1Fee = EthFees.weiToEther(
+                gasFeesAtL1Blocks[receipt.l1BlockNumber] * BigInt(L1Gas)
+            )
 
             transactionsCalculated++
 
