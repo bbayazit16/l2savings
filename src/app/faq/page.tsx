@@ -49,10 +49,14 @@ export default function Faq() {
                     After the migration to Nitro, Arbitrum replaced &quot;arbgas&quot; with the
                     standard L1-equivalent unit of gas that we&apos;re all used to. So, L2Gas is a
                     combination of L1 Calldata Gas + L2 Gas (which is equal to L1 computation
-                    costs). However, since its very difficult to know the L1 gas price during the
+                    costs). Since eth_getTransactionReceipt includes the L1 block number, we can use
+                    this to query eth_feeHistory to get the median of the L1 average gas price
+                    during the time of the transaction. So, Nitro upgrade actually made transactions
+                    cheaper and easier to calculate savings!
+                    {/* However, since its very difficult to know the L1 gas price during the
                     time of the transaction, the average daily gas price during the date of the
                     transaction is used. Still, the Nitro upgrade not only made transactions
-                    cheaper, but it also made it easier and more accurate to calculate savings!
+                    cheaper, but it also made it easier and more accurate to calculate savings! */}
                 </p>
             </div>
 
@@ -81,9 +85,10 @@ export default function Faq() {
                 <h2 className="text-4xl text-[#F04623]">Linea</h2>
                 <p>
                     Similar to Optimism, savings are relatively accurate since each unit of L2 gas
-                    is equivalent to Ethereum&apos;s, thanks to EVM equivalence. However, just like
-                    Arbitrum, we have to calculate the average daily gas price during the date of
-                    the transaction to estimate the L1 fees.
+                    is equivalent to Ethereum&apos;s, thanks to EVM equivalence. However,
+                    eth_getTransactionReceipt calls do not return the L1 block number and we have to
+                    calculate the average daily gas price during the date of the transaction to
+                    estimate the L1 fees.
                 </p>
             </div>
         </main>

@@ -89,7 +89,7 @@ export default class Optimism implements L2 {
                 current: 0,
                 total: 0,
             })
-            return noSavings
+            return JSON.parse(JSON.stringify(noSavings)) as Savings
         }
 
         const allSavings: TransactionSavings[] = []

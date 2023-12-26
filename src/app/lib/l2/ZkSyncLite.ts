@@ -130,7 +130,7 @@ export default class ZkSyncLite implements L2 {
                     current: 0,
                     total: 0,
                 })
-                return noSavings
+                return JSON.parse(JSON.stringify(noSavings)) as Savings
             }
 
             allTransactions.push(transactions)

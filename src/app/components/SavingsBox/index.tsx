@@ -10,7 +10,19 @@ import useSavings from "@/app/hooks/useSavings"
 import TransactionBox from "./TransactionBox"
 
 function ProgressBar({ current, total }: { current: number; total: number | undefined }) {
-    const width = total ? `${(current / total) * 100}%` : "0%"
+    // Due to the constantly changing total, this seemingly complex calculation of width
+    // is needed just to make sure the width doesn't exceed 100% and to handle 0/0 cases.
+    let width = "0%"
+    if (total === 0 && current === 0) {
+        width = "100%"
+    } else if (total) {
+        let percentage = (current / total) * 100
+        if (percentage > 100) {
+            percentage = 100
+        }
+        width = `${percentage}%`
+    }
+
     return (
         <div className="flex flex-row items-center gap-2 w-full">
             <span className="text-lg justify-self-end">{current}</span>
@@ -66,11 +78,11 @@ export default function SavingsBox() {
             {/* <h1 className="font-bold text-3xl">What is L2Savings?</h1> */}
             <div className="flex flex-col space-y-4 text-justify">
                 <p>
-                    L2Saving analyzes your L2 transactions, converting gas used to L1 equivalents
-                    based on the gas prices <strong>when those transactions happened</strong>. This
+                    L2Saving analyzes your L2 transactions, converting gas used to L1 equivalents{" "}
+                    <strong>based on the gas prices when those transactions happened</strong>. This
                     allows you to see how much you&apos;ve saved compared to if you&apos;d done the
-                    same, exact transaction on the Ethereum Mainnet. L2Savings excludes any
-                    self-transfers and failed transactions — just your net savings.
+                    same, exact transaction on the Ethereum Mainnet. L2Savings also excludes any
+                    self-transfers and failed transactions.
                 </p>
             </div>
             <div className="flex flex-row space-x-4">
@@ -89,7 +101,12 @@ export default function SavingsBox() {
                 </div>
                 <div className="flex flex-row space-x-2">
                     <span>Linea</span>
-                    <ButtonImage src="/linea.svg" alt="Linea logo" className="dark:invert" animate />
+                    <ButtonImage
+                        src="/linea.svg"
+                        alt="Linea logo"
+                        className="dark:invert"
+                        animate
+                    />
                 </div>
             </div>
             <p>To get started, input your Ethereum address or ENS:</p> <EnterAddress />

@@ -1,14 +1,14 @@
-import { noSavingsLocalized } from "./constants"
+import { noSavings, noSavingsLocalized } from "./constants"
 
 export default class SavingsData {
     public static localize(savings: AllSavings | undefined): AllSavingsLocalized {
         if (!savings) {
             return {
-                optimism: noSavingsLocalized,
-                arbitrum: noSavingsLocalized,
-                zkSyncLite: noSavingsLocalized,
-                linea: noSavingsLocalized,
-                all: noSavingsLocalized,
+                optimism: JSON.parse(JSON.stringify(noSavingsLocalized)),
+                arbitrum: JSON.parse(JSON.stringify(noSavingsLocalized)),
+                zkSyncLite: JSON.parse(JSON.stringify(noSavingsLocalized)),
+                linea: JSON.parse(JSON.stringify(noSavingsLocalized)),
+                all: JSON.parse(JSON.stringify(noSavingsLocalized)),
             }
         }
 
@@ -21,8 +21,27 @@ export default class SavingsData {
     }
 
     public static calculateTotalSavings(...savings: Savings[]): Savings {
-        const total = savings.reduce((acc, obj) => (acc = SavingsData._sumObjects(acc, obj)))
-        total.saved.timesCheaper = total.L1.feesSpent.ether / total.L2.feesSpent.ether
+        const total = JSON.parse(JSON.stringify(noSavings))
+
+        savings.forEach(s => {
+            total.L1.gasSpent += s.L1.gasSpent
+            total.L1.feesSpent.ether += s.L1.feesSpent.ether
+            total.L1.feesSpent.usd += s.L1.feesSpent.usd
+
+            total.L2.transactionsSent += s.L2.transactionsSent
+            total.L2.gasSpent += s.L2.gasSpent
+            total.L2.feesSpent.ether += s.L2.feesSpent.ether
+            total.L2.feesSpent.usd += s.L2.feesSpent.usd
+
+            total.saved.ether += s.saved.ether
+            total.saved.usd += s.saved.usd
+
+            total.details = total.details.concat(s.details)
+        })
+
+        total.saved.timesCheaper =
+            total.L2.feesSpent.ether !== 0 ? total.L1.feesSpent.ether / total.L2.feesSpent.ether : 0
+
         return total
     }
 
@@ -30,19 +49,6 @@ export default class SavingsData {
         const savingsDup = JSON.parse(JSON.stringify(savings))
         savingsDup.all.details = []
         return encodeURIComponent(JSON.stringify(savingsDup))
-    }
-
-    private static _sumObjects(a: any, b: any): any {
-        return Object.keys(a).reduce((acc: any, key: any) => {
-            if (Array.isArray(b[key])) {
-                acc[key] = a[key].concat(b[key])
-            } else if (typeof b[key] === "object") {
-                acc[key] = this._sumObjects(a[key], b[key])
-            } else {
-                acc[key] = (isNaN(a[key]) ? 0 : a[key]) + (isNaN(b[key]) ? 0 : b[key])
-            }
-            return acc
-        }, {})
     }
 
     private static _localize(obj: any): any {

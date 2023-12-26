@@ -41,23 +41,30 @@ export default function SavingsProvider({ children }: { children: React.ReactNod
 
         setSavingsStartedFetching(true)
 
-        const [optimismSavings, arbitrumSavings, zkSyncLiteSavings, lineaSavings] = await Promise.all([
-            new Optimism(account.address, setOptimismSavingsCalculated).calculateSavings(),
-            new Arbitrum(account.address, setArbitrumSavingsCalculated).calculateSavings(),
-            new ZkSyncLite(account.address, setZkSyncLiteSavingsCalculated).calculateSavings(),
-            new Linea(account.address, setLineaSavingsCalculated).calculateSavings(),
-        ]).catch(() => {
-            setOptimismSavingsCalculated(noProgress)
-            setArbitrumSavingsCalculated(noProgress)
-            setZkSyncLiteSavingsCalculated(noProgress)
-            setLineaSavingsCalculated(noProgress)
-            return [noSavings, noSavings, noSavings]
-        })
+        const [optimismSavings, arbitrumSavings, zkSyncLiteSavings, lineaSavings] =
+            await Promise.all([
+                new Optimism(account.address, setOptimismSavingsCalculated).calculateSavings(),
+                new Arbitrum(account.address, setArbitrumSavingsCalculated).calculateSavings(),
+                new ZkSyncLite(account.address, setZkSyncLiteSavingsCalculated).calculateSavings(),
+                new Linea(account.address, setLineaSavingsCalculated).calculateSavings(),
+            ]).catch(e => {
+                console.error(e)
+                setOptimismSavingsCalculated(noProgress)
+                setArbitrumSavingsCalculated(noProgress)
+                setZkSyncLiteSavingsCalculated(noProgress)
+                setLineaSavingsCalculated(noProgress)
+                return [
+                    JSON.parse(JSON.stringify(noSavings)) as Savings,
+                    JSON.parse(JSON.stringify(noSavings)) as Savings,
+                    JSON.parse(JSON.stringify(noSavings)) as Savings,
+                ]
+            })
 
         const savings = SavingsData.calculateTotalSavings(
             optimismSavings,
             arbitrumSavings,
-            zkSyncLiteSavings
+            zkSyncLiteSavings,
+            lineaSavings
         )
 
         setAllSavings({
