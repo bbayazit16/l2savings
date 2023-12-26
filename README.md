@@ -2,25 +2,25 @@
 
 _How much fees have you saved by using Ethereum L2's?_
 
-See how much fees Ξ$ you saved on [l2savings.org](https://www.l2savings.org)!
+See how much fees Ξ$ you've saved on [l2savings.org](https://www.l2savings.org)!
 
 ## Motivation
 
-Ethereum Layer 2 solutions offer near-instant confirmations, Ethereum-level security and decentralization, and near-infinite scalability. They are one of the most convenient ways of solving the [blockchain trilemma](https://vitalik.ca/general/2021/04/07/sharding.html), along with [sharding](https://ethereum.org/en/upgrades/shard-chains/). However Ethereum Layer 2's often lack marketing and incentives to push developers to deploy their applications on them. L2Savings aims to show how much anyone has saved by using Ethereum L2's compared to if their transactions were sent on Ethereum Mainnet.
+Ethereum Layer 2 solutions offer near-instant confirmations, Ethereum-level security and decentralization, and near-infinite scalability. They are one of the most convenient ways of solving the [blockchain trilemma](https://vitalik.ca/general/2021/04/07/sharding.html), along with [sharding](https://ethereum.org/en/upgrades/shard-chains/). However Ethereum Layer 2's often lack marketing and incentives to push developers to deploy their applications on them. L2Savings aims to show how much anyone has saved by using Ethereum L2s compared to if their transactions were sent on Ethereum Mainnet.
 
 ## Data Provided
 
 Following data is provided for every supported chain:
 
-- Transaction Count On L2
-- Gas Spent on L2 (Converted To Mainnet Gas If Applicable)
-- Chain-Native Gas Spent (eg. arbgas)
-- L2 Fees Paid in Ether
-- L2 Fees Paid in USD (according to Ether's current value)
-- L1 Fees Paid in Ether (If L2 transactions were sent on L1)
-- L1 Fees Paid in USD
-- Fees Saved in Ether and USD
-- Times cheaper (Fee If On L1 / L2 Fee paid)
+-   Transaction Count On L2
+-   Gas Spent on L2 (Converted To Mainnet Gas If Applicable)
+-   Chain-Native Gas Spent (eg. arbgas)
+-   L2 Fees Paid in Ether
+-   L2 Fees Paid in USD (according to Ether's current value)
+-   L1 Fees Paid in Ether (If L2 transactions were sent on L1)
+-   L1 Fees Paid in USD
+-   Fees Saved in Ether and USD
+-   Times cheaper (Fee If On L1 / L2 Fee paid)
 
 ## How Savings Are Calculated
 
@@ -45,7 +45,7 @@ L2Gas includes both the L2 computation cost and the L1 calldata gas cost. So:
 
 L1Gas = L2Gas - gasUsedForL1
 
-Similar to Optimism, all values can be found in the eth_getTransactionReceipt method. Later, L1Gas is multipled with average daily L1 gas price at the day of the transaction.
+Similar to Optimism, all values can be found in the eth_getTransactionReceipt method. L1 Gas price during the time of the transaction is found by querying eth_feeHistory with a median reward value using `eth_getTransactionReceipt.l1BlockNumber` value.
 
 ## ZkSync Lite
 
@@ -53,59 +53,22 @@ Similar to Optimism, all values can be found in the eth_getTransactionReceipt me
 
 > Two rollups walk into a bar. The barman asks: "Can I see your ids?". ZK Rollup says: "I can prove to you I'm over 18, but I won't show you my id". Optimistic Rollup says: "If nobody can prove I'm underage in 7 days that means I'm over 18" [Source](https://twitter.com/l2beatcom/status/1448556881686024192)
 
- However ZkSync Lite is not EVM equivalent, unlike ZkSync ERA, making it harder to predict equivalent L1 gas cost of operations. ZkSync has "types" of transactions, which are ChangePubKey, Transfer, Swap, Withdraw, ForcedExit, MintNFT and WithdrawNFT. The L2 <--> L1 gas is estimate is thus done by using the average costs for each operation on Ethereum L1. Which means Ether transfers are considered as 21000 gas, token transfers 65000, swaps 160000 and NFT Mints 150000. ZkSync also allows users to pay with different tokens, such as stablecoins, which requires the conversion of fees paid into ether with the price rate during the time of transaction. For a diagram of how the calculation process goes, see [this diagram](https://github.com/bbayazit16/L2Savings/blob/master/src/Savings/ZkSync.ts#L20).
+However ZkSync Lite is not EVM equivalent, unlike ZkSync ERA, making it harder to predict equivalent L1 gas cost of operations. ZkSync has "types" of transactions, which are ChangePubKey, Transfer, Swap, Withdraw, ForcedExit, MintNFT and WithdrawNFT. The L2 <--> L1 gas is estimate is thus done by using the average costs for each operation on Ethereum L1. Which means Ether transfers are considered as 21000 gas, token transfers 65000, swaps 160000 and NFT Mints 150000. ZkSync also allows users to pay with different tokens, such as stablecoins, which requires the conversion of fees paid into ether with the price rate during the time of transaction. For a diagram of how the calculation process goes, see [this diagram](https://github.com/bbayazit16/L2Savings/blob/master/src/Savings/ZkSync.ts#L20).
 
 ## Linea
 
-[Linea](https://linea.app/) is a ZK Rollup which is EVM equivalent. This means that the gas cost of operations on Linea is the same as Ethereum L1.
+[Linea](https://linea.build/) is a ZK Rollup which is EVM equivalent. This means that the gas cost of operations on Linea is the same as Ethereum L1. However Linea RPC does not return l1BlockNumber, so we have to use the average daily gas price during the day of the transaction.
 
-## Installing Dependencies
+## Building and Running
 
-_Make sure you are on the root directory and have yarn installed._
-
-```sh
-yarn install
+```bash
+yarn install # install dependencies
+yarn dev # run development server
+yarn build # build for production
+yarn start # run production server
 ```
 
-## Starting Development Server
-
-_Make sure you are on the root directory and have yarn installed._
-
-Create .env file and add environment variables (by referring to .env.development)
-Make sure RPCs support batch JSON RPC requests.
-
-Modify .env.development to change the default development RPCs
-
-```sh
-yarn dev
-```
-
-## Building From Source
-
-_Make sure you are on the root directory and have yarn installed._
-
-Create .env file and add environment variables (by referring to .env.development)
-Make sure RPCs support batch JSON RPC requests.
-
-```sh
-yarn build
-```
-
-## Serving App From Build
-
-_Make sure you are on the root directory._
-
-Install serve if you haven't already:
-
-```sh
-yarn global add serve
-```
-
-Then run:
-
-```sh
-serve -s build
-```
+Make sure to create a `.env.local` file based on [.env.example](.env.example) with your own API keys.
 
 ## License
 
