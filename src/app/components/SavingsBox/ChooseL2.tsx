@@ -8,10 +8,10 @@ export default function ChooseL2() {
     const { setChosenL2 } = useChosenL2()
 
     return (
-        <div className="flex flex-row justify-evenly space-x-2 flex-wrap">
+        <div className="flex flex-row flex-wrap justify-center md:space-x-2">
             <Button onClick={() => setChosenL2("all")}>
                 <span>All L2s</span>
-                <svg className="rounded-full h-4 w-4 md:h-8 md:w-8 overflow-hidden border-black border-[3px] hover:rotate-360 bg-gradient-to-r from-green-700 via-cyan-600 to-blue-400" />
+                <svg className="rounded-full h-6 w-6 md:h-8 md:w-8 overflow-hidden border-black border-2 md:border-[3px] hover:rotate-360 bg-gradient-to-r from-green-700 via-cyan-600 to-blue-400" />
             </Button>
             <Button onClick={() => setChosenL2("optimism")}>
                 <span>Optimism</span>

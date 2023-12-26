@@ -57,7 +57,7 @@ export default function TransactionBox() {
     }, [details, sortByProps.key])
 
     return (
-        <div className="flex flex-col overflow-y-scroll h-64 w-full border-zinc-800 dark:border-white border-2 p-4 rounded-lg">
+        <div className="flex flex-col overflow-y-scroll h-64 lg:h-96 w-full border-zinc-800 dark:border-white border-2 p-4 rounded-lg">
             <table className="w-full">
                 <TableHeader changeSortBy={changeSortBy} triangleIsReverse={triangleIsReverse} />
                 <TableBody transactions={sortedTransactions} order={sortByProps.order} />
@@ -88,7 +88,7 @@ function TableHeader({
                 {headers.map(({ key, text }) => (
                     <th
                         key={key}
-                        className="text-left p-4 text-xl md:text-2xl select-none cursor-pointer"
+                        className="text-left p-4 select-none cursor-pointer"
                         onClick={() => changeSortBy(key)}
                     >
                         <span className="w-full flex flex-row">
@@ -141,7 +141,7 @@ function TableBody({
                             animate
                         />
                     </td>
-                    <td className="text-left text-xl p-4 underline text-blue-400">
+                    <td className="text-left p-4 underline text-blue-400">
                         <a
                             href={`${explorerUri(transaction.L2)}/tx/${transaction.hash}`}
                             target="_blank"
@@ -150,10 +150,10 @@ function TableBody({
                             {truncateTransactionHash(transaction.hash)}
                         </a>
                     </td>
-                    <td className="text-left text-xl p-4">{transaction.L2Fee}Ξ</td>
-                    <td className="text-left text-xl p-4">{transaction.L1Fee}Ξ</td>
-                    <td className="text-left text-xl p-4">{transaction.saved}Ξ</td>
-                    <td className="text-left text-xl p-4">
+                    <td className="text-left p-4">{transaction.L2Fee}Ξ</td>
+                    <td className="text-left p-4">{transaction.L1Fee}Ξ</td>
+                    <td className="text-left p-4">{transaction.saved}Ξ</td>
+                    <td className="text-left p-4">
                         {parseFloat(transaction.timesCheaper).toFixed(1).toLocaleString()}x
                     </td>
                 </tr>

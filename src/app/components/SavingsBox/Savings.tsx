@@ -61,8 +61,8 @@ export default function Savings() {
     const dataColor = colorMap[chosenL2].dataColor
 
     return (
-        <div className="flex flex-col p-5 space-y-8">
-            <p className="font-bold text-3xl">
+        <div className="flex flex-col p-5 space-y-4 md:space-y-8">
+            <p className="font-bold md:text-3xl">
                 You have sent{" "}
                 <Stat
                     text={L2.transactionsSent}
@@ -75,7 +75,7 @@ export default function Savings() {
                 <Stat text={L2.feesSpent.usd} what="usd" dataColor={dataColor} />.{" "}
                 <Emoji L2={L2} emoji="😁" />
             </p>
-            <p className="font-bold text-3xl">
+            <p className="font-bold md:text-3xl">
                 If you had sent these transactions on <Mainnet mainnetColor={colorMap.mainnet} />,
                 you would have spent <Stat text={L1.gasSpent} what="gas" dataColor={dataColor} />{" "}
                 and it would have cost{" "}
@@ -83,7 +83,7 @@ export default function Savings() {
                 <Stat text={L1.feesSpent.usd} what="usd" dataColor={dataColor} />.{" "}
                 <Emoji L2={L2} emoji="😮" />
             </p>
-            <p className="font-bold text-3xl">
+            <p className="font-bold md:text-3xl">
                 You have saved <Stat text={total.ether} what="ether" final dataColor={dataColor} />{" "}
                 in fees, worth <Stat text={total.usd} what="usd" final dataColor={dataColor} />.
                 That&apos;s <Stat text={total.timesCheaper} what="x" final dataColor={dataColor} />{" "}

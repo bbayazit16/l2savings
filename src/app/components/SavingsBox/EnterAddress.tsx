@@ -50,7 +50,7 @@ export default function EnterAddress() {
                     value={inputValue}
                     onChange={handleInputChange}
                     disabled={isLoading || savingsStartedFetching}
-                    className={`text-2xl rounded-lg border-2 p-2 py-1 bg-zinc-200 dark:bg-zinc-800 ${
+                    className={`md:text-2xl rounded-lg border-2 p-2 py-1 bg-zinc-200 dark:bg-zinc-800 ${
                         isInvalid
                             ? "border-red-500 animate-shake"
                             : "border-zinc-800 dark:border-white"

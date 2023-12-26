@@ -63,19 +63,20 @@ export default function SavingsBox() {
 
     if (savings) {
         return (
-            <div className="flex flex-col space-y-4">
-                <div className="flex flex-col m-auto border-zinc-800 dark:border-white border-2 p-4 rounded-lg">
+            <div className="flex flex-col space-y-4 px-2 sm:px-4 w-full">
+                <div className="w-full flex flex-col m-auto border-zinc-800 dark:border-white border-2 p-4 rounded-lg">
                     <ChooseL2 />
                     <Savings />
                 </div>
-                <TransactionBox />
+                <div className="w-full overflow-scroll">
+                    <TransactionBox />
+                </div>
             </div>
         )
     }
 
     return (
         <div className="flex flex-col space-y-4 mt-[10%]">
-            {/* <h1 className="font-bold text-3xl">What is L2Savings?</h1> */}
             <div className="flex flex-col space-y-4 text-justify">
                 <p>
                     L2Saving analyzes your L2 transactions, converting gas used to L1 equivalents{" "}
@@ -85,7 +86,7 @@ export default function SavingsBox() {
                     self-transfers and failed transactions.
                 </p>
             </div>
-            <div className="flex flex-row space-x-4">
+            <div className="flex flex-row flex-wrap justify-center md:justify-normal space-x-4">
                 <span>Supported Chains:</span>
                 <div className="flex flex-row space-x-2">
                     <span>Optimism</span>
@@ -112,7 +113,6 @@ export default function SavingsBox() {
             <p>To get started, input your Ethereum address or ENS:</p> <EnterAddress />
             {account && (
                 <div className="m-auto justify-center w-full">
-                    {/* <p>Fetching transactions...</p> */}
                     <SavingsProgress progress={progress} />
                 </div>
             )}
