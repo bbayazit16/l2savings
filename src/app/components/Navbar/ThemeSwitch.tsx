@@ -8,14 +8,14 @@ import { useEffect, useState } from "react"
 
 export default function ThemeSwitch() {
     const [isMounted, setIsMounted] = useState(false)
-    const { theme, setTheme } = useTheme()
+    const { resolvedTheme, setTheme } = useTheme()
 
     useEffect(() => {
         setIsMounted(true)
     }, [])
 
     const switchTheme = () => {
-        setTheme(theme === "dark" ? "light" : "dark")
+        setTheme(resolvedTheme === "dark" ? "light" : "dark")
     }
 
     if (!isMounted) {
@@ -25,12 +25,12 @@ export default function ThemeSwitch() {
     return (
         <div
             onClick={switchTheme}
-            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            aria-label={resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
             role="button"
             tabIndex={0}
             className="select-none"
         >
-            {theme === "dark" ? (
+            {resolvedTheme === "dark" ? (
                 <LuMoon className="cursor-pointer hover:scale-110 duration-500 transition-all" />
             ) : (
                 <LuSun className="cursor-pointer hover:scale-110 duration-500 transition-all" />
