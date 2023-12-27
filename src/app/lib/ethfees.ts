@@ -137,6 +137,10 @@ export default class EthFees {
     }
 
     public static async cacheGasTimestamps(timestamps: number[]) {
+        if (timestamps.length === 0) {
+            return
+        }
+
         const seenTimestamps = new Set<number>()
 
         let queryString = "{"
@@ -153,13 +157,19 @@ export default class EthFees {
         }
         queryString += "}"
 
+        if (queryString === "{}") {
+            return
+        }
+
         let response: any
         try {
             response = await EthFees.sdk.graph
                 .query("dmihal/ethereum-average-fees", queryString)
                 .catch(async () => {
                     console.warn(
-                        "Error caching average daily fees, proceeding without average gas cache"
+                        "Error caching average daily fees, proceeding without average gas cache.",
+                        `queryString: ${queryString}`,
+                        `timestamps: ${timestamps}`
                     )
                     response = undefined
                 })
