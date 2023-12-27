@@ -32,7 +32,7 @@ Fees if the transaction was sent on L1 at the same day with exactly the same gas
 
 For EVM equivalent L2's such as [Optimism](https://optimism.io/), it is easy to calculate the equivalent L1 cost, because the concept of gas is same on the L2. (L2 Gas \* Mainnet gas price at the time of transaction).
 
-The formula for Optimism Transaction fee is (Gas Price _Gas) + (L1 Gas Used_ L1 Fee Scalar \* L1 Gas Price).
+The formula for Optimism Transaction fee is (Gas Price \* Gas) + (L1 Gas Used \* L1 Fee Scalar \* L1 Gas Price).
 Optimistic Etherscan doesn't provide the transaction fee in their API, let alone the L1 Fee Scalar, L1 Gas Price and L1 Gas used. Due to this reason the L1 gas price and overhead is extracted from eth_getTransactionReceipt calls to an Optimism RPC.
 
 For more info, see [the FAQ](https://l2savings.org/faq)
@@ -58,6 +58,10 @@ However ZkSync Lite is not EVM equivalent, unlike ZkSync ERA, making it harder t
 ## Linea
 
 [Linea](https://linea.build/) is a ZK Rollup which is EVM equivalent. This means that the gas cost of operations on Linea is the same as Ethereum L1. However Linea RPC does not return l1BlockNumber, so we have to use the average daily gas price during the day of the transaction.
+
+## Base
+
+[Base](https://base.org) is an EVM-equivalent rollup based on Optimism's OP stack. The calculations for Base are exactly the same as Optimism; in fact, the code for calculating Base savings is a copy-paste of Optimism with the only difference being the RPC and explorer endpoints.
 
 ## Building and Running
 

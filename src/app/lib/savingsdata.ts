@@ -8,6 +8,7 @@ export default class SavingsData {
                 arbitrum: JSON.parse(JSON.stringify(noSavingsLocalized)),
                 zkSyncLite: JSON.parse(JSON.stringify(noSavingsLocalized)),
                 linea: JSON.parse(JSON.stringify(noSavingsLocalized)),
+                base: JSON.parse(JSON.stringify(noSavingsLocalized)),
                 all: JSON.parse(JSON.stringify(noSavingsLocalized)),
             }
         }

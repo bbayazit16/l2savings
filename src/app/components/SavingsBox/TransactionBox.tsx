@@ -134,9 +134,9 @@ function TableBody({
                         <ButtonImage
                             src={chainToAsset(transaction.L2)}
                             alt="L2 Logo"
-                            border={transaction.L2 === "optimism"}
+                            border={transaction.L2 === "optimism" || transaction.L2 === "base"}
                             className={clsx({
-                                "dark:invert": transaction.L2 === "linea",
+                                "dark:invert": transaction.L2 === "linea" || transaction.L2 === "base",
                             })}
                             animate
                         />

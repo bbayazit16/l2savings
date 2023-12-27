@@ -248,7 +248,8 @@ export default class Linea implements L2 {
                 transaction =>
                     transaction.from.toLowerCase() === this.address.toLowerCase() &&
                     transaction.txreceipt_status !== "0" &&
-                    transaction.gasUsed !== "0"
+                    transaction.gasUsed !== "0" &&
+                    transaction.gasPrice !== "0"
             )
             .map(transaction => {
                 return {

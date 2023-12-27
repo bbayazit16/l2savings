@@ -53,10 +53,6 @@ export default function Faq() {
                     this to query eth_feeHistory to get the median of the L1 average gas price
                     during the time of the transaction. So, Nitro upgrade actually made transactions
                     cheaper and easier to calculate savings!
-                    {/* However, since its very difficult to know the L1 gas price during the
-                    time of the transaction, the average daily gas price during the date of the
-                    transaction is used. Still, the Nitro upgrade not only made transactions
-                    cheaper, but it also made it easier and more accurate to calculate savings! */}
                 </p>
             </div>
 
@@ -89,6 +85,16 @@ export default function Faq() {
                     eth_getTransactionReceipt calls do not return the L1 block number and we have to
                     calculate the average daily gas price during the date of the transaction to
                     estimate the L1 fees.
+                </p>
+            </div>
+
+            <div>
+                <h2 className="text-4xl text-[#1C5BF0]">Base</h2>
+                <p>
+                    Base is a rollup based on Optimism&apos;s OP stack, so it&apos;s EVM equivalent
+                    and the L1 fee during the time of the transaction is available in the response
+                    of the eth_getTransactionReceipt call. This means calculations are performed in
+                    the same way as Optimism, so savings are highly accurate!
                 </p>
             </div>
         </main>

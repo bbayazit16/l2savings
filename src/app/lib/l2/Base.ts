@@ -6,28 +6,16 @@ import EthFees from "../ethfees"
 import getBatchCustomReceipts from "../gethBatchCustomReceipts"
 
 /**
- * Arbitrum class calculates savings for Arbitrum.
+ * Base class calculates savings for Base.
  *
  * ======== Methodology ========
  *
- * Arbitrum savings are only calculated for transactions after Arbitrum Nitro. This is because AVM had different
- * gas costs for each instruction compared to the EVM.
+ * @see Optimism.ts This file is a copy of Optimism.ts, the only difference being
+ * the environment variables.
  *
- * Arbgas concept was removed with Arbitrum Nitro.
- * @see https://github.com/OffchainLabs/nitro/blob/master/docs/migration/dapp_migration.md#cool-new-stuff
- *
- * So,
- *
- * L2Gas = gasUsed
- * L2Fee = L2Gas * effectiveGasPrice
- *
- * Gas if transaction was on L1:
- * L1Gas = L2Gas - gasUsedForL1, because L2Gas includes L1 calldata gas.
- *
- * L1Fees are calculated according to dmihal/ethereum-average-fees subgraph.
- *
+ * Base is EVM equivalent, and is based on Optimism's OP stack.
  */
-export default class Arbitrum implements L2 {
+export default class Base implements L2 {
     /**
      * The address that the data will be collected for
      */
@@ -84,8 +72,9 @@ export default class Arbitrum implements L2 {
         let totalL1Fees = 0
         let totalL2Fees = 0
 
-        let totalL1GasPredicted = 0
-        let totalL2GasSpent = 0
+        // The beauty of EVM equivalence is that each unit of L1 gas
+        // is equivalent to each unit of L2 gas :)
+        let totalGasSpent = 0
 
         // // Chunk receipts into batches of 5 (to avoid hitting api limits)
         // const chunkSize = transactions.length > 1_000 ? 10 : 5
@@ -98,18 +87,18 @@ export default class Arbitrum implements L2 {
         const receipts = []
         for (const transactionChunk of chunks) {
             if (this.signal && this.signal.aborted) {
-                throw new Error("Aborted: Arbitrum")
+                throw new Error("Aborted: Base")
             }
 
             let retries = 0
             while (retries < retryLimit) {
                 if (this.signal && this.signal.aborted) {
-                    throw new Error("Aborted: Arbitrum")
+                    throw new Error("Aborted: Base")
                 }
 
                 try {
                     const batchReceipts = await getBatchCustomReceipts(
-                        process.env.NEXT_PUBLIC_ARBITRUM_RPC!,
+                        process.env.NEXT_PUBLIC_BASE_RPC!,
                         transactionChunk.map(tx => tx.hash)
                     )
 
@@ -121,12 +110,11 @@ export default class Arbitrum implements L2 {
 
                     receipts.push({
                         receipts: batchReceipts,
+                        gasPrices: transactionChunk.map(tx => tx.gasPrice),
                     })
                     break
                 } catch (error) {
-                    console.error(
-                        `Error fetching receipts for chunk in Arbitrum. Retrying: ${error}`
-                    )
+                    console.error(`Error fetching receipts for chunk in Base. Retrying: ${error}`)
                     await new Promise(resolve => setTimeout(resolve, delayTime))
 
                     retries++
@@ -139,8 +127,16 @@ export default class Arbitrum implements L2 {
         }
 
         const flatReceipts = receipts
-            .flatMap(({ receipts }) => receipts)
-            .filter(receipt => receipt?.l1BlockNumber != null)
+            .map(({ receipts, gasPrices }) => {
+                return receipts.map((receipt: any, index: number) => {
+                    return {
+                        receipt,
+                        gasPrice: gasPrices[index],
+                    }
+                })
+            })
+            .flat()
+            .filter(receipt => receipt.receipt !== null && receipt.receipt !== undefined)
 
         this.onSavingCalculated({
             text: "Fetching transaction receipts",
@@ -148,44 +144,32 @@ export default class Arbitrum implements L2 {
             total: flatReceipts.length,
         })
 
-        const l1Blocks = flatReceipts.map(receipt => receipt.l1BlockNumber)
-
-        const gasFeesAtL1Blocks = await EthFees.getGasFeesAtBlocks(l1Blocks, (current: number) => {
-            this.onSavingCalculated({
-                text: "Fetching transaction receipts",
-                current,
-                total: flatReceipts.length,
-            })
-        })
-
         if (this.signal && this.signal.aborted) {
-            throw new Error("Aborted: Arbitrum")
+            throw new Error("Aborted: Base")
         }
 
         let transactionsCalculated = 0
-        for (const receipt of flatReceipts) {
+        for (const { receipt, gasPrice } of flatReceipts) {
             if (this.signal && this.signal.aborted) {
-                throw new Error("Aborted: Arbitrum")
+                throw new Error("Aborted: Base")
             }
 
-            // L2Gas including L1 calldata
-            const L2Gas = parseInt(receipt.gasUsed, 16)
-
-            // Total fee paid on Arbitrum
             const L2Fee = EthFees.weiToEther(
-                BigInt(receipt.gasUsed) * BigInt(receipt.effectiveGasPrice)
+                BigInt(receipt.gasUsed) * BigInt(gasPrice) + BigInt(receipt.l1Fee)
             )
 
-            const L1Gas = L2Gas - parseInt(receipt.gasUsedForL1, 16)
-
-            const L1Fee = EthFees.weiToEther(
-                gasFeesAtL1Blocks[receipt.l1BlockNumber] * BigInt(L1Gas)
-            )
+            const L1Fee = EthFees.weiToEther(BigInt(receipt.gasUsed) * BigInt(receipt.l1GasPrice))
 
             transactionsCalculated++
 
+            this.onSavingCalculated({
+                text: "Calculating fees",
+                current: transactionsCalculated,
+                total: flatReceipts.length,
+            })
+
             allSavings.push({
-                L2: "arbitrum",
+                L2: "base",
                 hash: receipt.transactionHash,
                 L2Fee,
                 L1Fee,
@@ -196,8 +180,7 @@ export default class Arbitrum implements L2 {
             totalL1Fees += L1Fee
             totalL2Fees += L2Fee
 
-            totalL1GasPredicted += L1Gas
-            totalL2GasSpent += L2Gas
+            totalGasSpent += parseInt(receipt.gasUsed, 16)
         }
 
         this.onSavingCalculated({
@@ -207,7 +190,7 @@ export default class Arbitrum implements L2 {
         })
 
         if (this.signal && this.signal.aborted) {
-            throw new Error("Aborted: Arbitrum")
+            throw new Error("Aborted: Base")
         }
 
         const totalL1FeesUsd = await EthFees.ethToUsd(totalL1Fees)
@@ -215,7 +198,7 @@ export default class Arbitrum implements L2 {
 
         return {
             L1: {
-                gasSpent: totalL1GasPredicted,
+                gasSpent: totalGasSpent,
                 feesSpent: {
                     ether: totalL1Fees,
                     usd: totalL1FeesUsd,
@@ -223,7 +206,7 @@ export default class Arbitrum implements L2 {
             },
             L2: {
                 transactionsSent: transactions.length,
-                gasSpent: totalL2GasSpent,
+                gasSpent: totalGasSpent,
                 feesSpent: {
                     ether: totalL2Fees,
                     usd: totalL2FeesUsd,
@@ -239,14 +222,12 @@ export default class Arbitrum implements L2 {
     }
 
     /**
-     * @return transactions for the address after Arbitrum nitro
+     * @return all transaction hashes and their gas prices
      */
-    private async getAllTransactions(): Promise<{ hash: string; timestamp: number }[]> {
-        // Get all transactions of address before Arbitrum Nitro (+- 4 hours)
+    private async getAllTransactions(): Promise<{ hash: string; gasPrice: string }[]> {
         const transactions = await customFetch(
-            `https://api.arbiscan.io/api?module=account&action=txlist&address=${this.address}&startBlock=22213298&sort=desc&apikey=${process.env.NEXT_PUBLIC_ARBISCAN_API_KEY}`
+            `https://api.basescan.org/api?module=account&action=txlist&address=${this.address}&sort=desc&apikey=${process.env.NEXT_PUBLIC_BASESCAN_API_KEY}`
         )
-
         // Filter incoming transactions and remove:
         // - transactions that are not outgoing
         // - transactions that failed
@@ -263,7 +244,7 @@ export default class Arbitrum implements L2 {
             .map(transaction => {
                 return {
                     hash: transaction.hash,
-                    timestamp: parseInt(transaction.timeStamp),
+                    gasPrice: transaction.gasPrice,
                 }
             })
     }

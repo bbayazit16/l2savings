@@ -22,7 +22,7 @@ interface Transaction {
     txreceipt_status: "0" | "1"
 }
 
-type AvailableL2s = "all" | "optimism" | "arbitrum" | "zkSyncLite" | "linea"
+type AvailableL2s = "all" | "optimism" | "arbitrum" | "zkSyncLite" | "linea" | "base"
 
 interface TransactionSavings {
     L2: AvailableL2s

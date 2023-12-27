@@ -29,6 +29,10 @@ export default function ChooseL2() {
                 <span>Linea</span>
                 <ButtonImage src="/linea.svg" alt="Linea logo" className="dark:invert" animate />
             </Button>
+            <Button onClick={() => setChosenL2("base")}>
+                <span>Base</span>
+                <ButtonImage src="/base.svg" alt="Base logo" className="dark:invert" animate border rounded />
+            </Button>
         </div>
     )
 }

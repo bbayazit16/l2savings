@@ -52,7 +52,23 @@ export const noSavingsLocalized = {
     details: [],
 }
 
-export const colorMap = {
+type CommonL2Color = {
+    dataColor: string
+    chainColor: string
+}
+
+type L2Colors = {
+    dataColor: string
+    chainColor: string
+}
+
+type ColorMapType = {
+    [K in AvailableL2s]: L2Colors
+} & {
+    mainnet: string
+}
+
+export const colorMap: ColorMapType = {
     all: {
         dataColor: "#47BF61",
         chainColor: "#51c72a",
@@ -72,6 +88,10 @@ export const colorMap = {
     linea: {
         dataColor: "#F5A623",
         chainColor: "#F04623",
+    },
+    base: {
+        dataColor: "#3F6AD1",
+        chainColor: "#1C5BF0",
     },
     mainnet: "#6872ab",
 }

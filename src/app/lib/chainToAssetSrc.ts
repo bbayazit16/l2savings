@@ -10,5 +10,7 @@ export default function chainToAsset(chain: AvailableL2s): string {
             return "/zksync.svg"
         case "linea":
             return "/linea.svg"
+        case "base":
+            return "/base.svg"
     }
 }

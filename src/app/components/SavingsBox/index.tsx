@@ -52,6 +52,7 @@ function SavingsProgress({
             {renderProgress("Optimism", progress.optimism)}
             {renderProgress("ZkSync Lite", progress.zkSyncLite)}
             {renderProgress("Linea", progress.linea)}
+            {renderProgress("Base", progress.base)}
         </div>
     )
 }
@@ -108,6 +109,10 @@ export default function SavingsBox() {
                         className="dark:invert"
                         animate
                     />
+                </div>
+                <div className="flex flex-row space-x-2">
+                    <span>Base</span>
+                    <ButtonImage src="/base.svg" alt="Base logo" className="dark:invert" animate border rounded />
                 </div>
             </div>
             <p>To get started, input your Ethereum address or ENS:</p> <EnterAddress />

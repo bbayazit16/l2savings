@@ -10,5 +10,7 @@ export default function localizeChain(chain: AvailableL2s): string {
             return "ZkSync Lite"
         case "linea":
             return "Linea"
+        case "base":
+            return "Base"
     }
 }

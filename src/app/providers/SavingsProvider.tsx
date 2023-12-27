@@ -9,6 +9,7 @@ import Optimism from "../lib/l2/Optimism"
 import Arbitrum from "../lib/l2/Arbitrum"
 import ZkSyncLite from "../lib/l2/ZkSyncLite"
 import Linea from "../lib/l2/Linea"
+import Base from "../lib/l2/Base"
 
 interface SavingsContextProps {
     savings: AllSavings | undefined
@@ -32,6 +33,7 @@ export default function SavingsProvider({ children }: { children: React.ReactNod
     const [zkSyncLiteSavingsCalculated, setZkSyncLiteSavingsCalculated] =
         useState<CalcProgress>(noProgress)
     const [lineaSavingsCalculated, setLineaSavingsCalculated] = useState<CalcProgress>(noProgress)
+    const [baseSavingsCalculated, setBaseSavingsCalculated] = useState<CalcProgress>(noProgress)
 
     const { account } = useAccount()
 
@@ -42,6 +44,7 @@ export default function SavingsProvider({ children }: { children: React.ReactNod
         setArbitrumSavingsCalculated(noProgress)
         setZkSyncLiteSavingsCalculated(noProgress)
         setLineaSavingsCalculated(noProgress)
+        setBaseSavingsCalculated(noProgress)
     }
 
     const calculateAllSavings = useCallback(
@@ -65,20 +68,20 @@ export default function SavingsProvider({ children }: { children: React.ReactNod
                     signal
                 ).calculateSavings(),
                 new Linea(account.address, setLineaSavingsCalculated, signal).calculateSavings(),
+                new Base(account.address, setBaseSavingsCalculated, signal).calculateSavings(),
             ]
 
             const results = await Promise.allSettled(promises)
 
-            const [optimismSavings, arbitrumSavings, zkSyncLiteSavings, lineaSavings] = results.map(
-                result => {
+            const [optimismSavings, arbitrumSavings, zkSyncLiteSavings, lineaSavings, baseSavings] =
+                results.map(result => {
                     if (result.status === "fulfilled") {
                         return result.value
                     } else {
                         console.error("Error calculating savings for a service:", result.reason)
                         return JSON.parse(JSON.stringify(noSavings)) as Savings
                     }
-                }
-            )
+                })
 
             if (signal.aborted) return
 
@@ -86,7 +89,8 @@ export default function SavingsProvider({ children }: { children: React.ReactNod
                 optimismSavings,
                 arbitrumSavings,
                 zkSyncLiteSavings,
-                lineaSavings
+                lineaSavings,
+                baseSavings
             )
 
             if (signal.aborted) return
@@ -96,6 +100,7 @@ export default function SavingsProvider({ children }: { children: React.ReactNod
                 arbitrum: arbitrumSavings,
                 zkSyncLite: zkSyncLiteSavings,
                 linea: lineaSavings,
+                base: baseSavings,
                 all: savings,
             }
         },
@@ -138,6 +143,7 @@ export default function SavingsProvider({ children }: { children: React.ReactNod
                     arbitrum: arbitrumSavingsCalculated,
                     zkSyncLite: zkSyncLiteSavingsCalculated,
                     linea: lineaSavingsCalculated,
+                    base: baseSavingsCalculated,
                 },
                 savingsStartedFetching,
             }}
