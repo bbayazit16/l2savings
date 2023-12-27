@@ -3,6 +3,7 @@
 import { useTheme } from "next-themes"
 import { LuSun } from "react-icons/lu"
 import { LuMoon } from "react-icons/lu"
+import { LuGhost } from "react-icons/lu"
 import { useEffect, useState } from "react"
 
 export default function ThemeSwitch() {
@@ -18,9 +19,7 @@ export default function ThemeSwitch() {
     }
 
     if (!isMounted) {
-        // Since the default theme is "dark", we're making an educated guess.
-        // You could also return null here.
-        return <LuMoon className="cursor-pointer" />
+        return <LuGhost className="cursor-pointer" />
     }
 
     return (

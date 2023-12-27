@@ -116,7 +116,7 @@ export default class Arbitrum implements L2 {
             await new Promise(resolve => setTimeout(resolve, delayTime))
         }
 
-        const flatReceipts: { receipt: any }[] = receipts
+        const flatReceipts = receipts
             .flatMap(({ receipts }) => receipts)
             .filter(receipt => receipt?.l1BlockNumber != null)
 
@@ -126,7 +126,7 @@ export default class Arbitrum implements L2 {
             total: flatReceipts.length,
         })
 
-        const l1Blocks = flatReceipts.map(receipt => receipt.receipt.l1BlockNumber)
+        const l1Blocks = flatReceipts.map(receipt => receipt.l1BlockNumber)
 
         const gasFeesAtL1Blocks = await EthFees.getGasFeesAtBlocks(l1Blocks, (current: number) => {
             this.onSavingCalculated({
@@ -137,7 +137,7 @@ export default class Arbitrum implements L2 {
         })
 
         let transactionsCalculated = 0
-        for (const { receipt } of flatReceipts) {
+        for (const receipt of flatReceipts) {
             // L2Gas including L1 calldata
             const L2Gas = parseInt(receipt.gasUsed, 16)
 

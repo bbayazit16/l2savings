@@ -64,7 +64,7 @@ export default class EthFees {
                             )
                             .catch(async () => {
                                 console.warn(
-                                    `Error fetching average daily fee ${type} at ${Math.floor(
+                                    `Error fetching average daily fee: ${type} at ${Math.floor(
                                         timestamp
                                     )}, returning current fee`
                                 )

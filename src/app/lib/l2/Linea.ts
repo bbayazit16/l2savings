@@ -98,6 +98,7 @@ export default class Linea implements L2 {
                     receipts.push({
                         receipts: batchReceipts,
                         gasPrices: transactionChunk.map(tx => tx.gasPrice),
+                        timestamps: transactionChunk.map(tx => parseInt(tx.timestamp)),
                     })
                     break
                 } catch (error) {
@@ -112,11 +113,12 @@ export default class Linea implements L2 {
         }
 
         const flatReceipts = receipts
-            .map(({ receipts, gasPrices }) => {
+            .map(({ receipts, gasPrices, timestamps }) => {
                 return receipts.map((receipt: any, index: number) => {
                     return {
                         receipt,
                         gasPrice: gasPrices[index],
+                        timestamp: timestamps[index],
                     }
                 })
             })
@@ -198,7 +200,9 @@ export default class Linea implements L2 {
     /**
      * @return all transaction hashes and their gas prices
      */
-    private async getAllTransactions(): Promise<{ hash: string; gasPrice: string }[]> {
+    private async getAllTransactions(): Promise<
+        { hash: string; gasPrice: string; timestamp: string }[]
+    > {
         const transactions = await customFetch(
             `https://api.lineascan.build/api?module=account&action=txlist&address=${this.address}&sort=desc&apikey=${process.env.NEXT_PUBLIC_LINEASCAN_API_KEY}`
         )
@@ -218,6 +222,7 @@ export default class Linea implements L2 {
                 return {
                     hash: transaction.hash,
                     gasPrice: transaction.gasPrice,
+                    timestamp: transaction.timeStamp,
                 }
             })
     }
