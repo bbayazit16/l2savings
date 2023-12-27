@@ -107,8 +107,8 @@ export default class Optimism implements L2 {
         // Update 2023-12-25: Trying limits of 10 due to api limits
         const chunkSize = 10
         const chunks = chunk(transactions, chunkSize)
-        const retryLimit = 4
-        const delayTime = 500
+        const retryLimit = 6
+        const delayTime = 375
         const receipts = []
         for (const transactionChunk of chunks) {
             let retries = 0

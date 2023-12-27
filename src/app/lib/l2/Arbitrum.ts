@@ -83,8 +83,8 @@ export default class Arbitrum implements L2 {
         // Update 2023-12-25: Trying limits of 10 due to api limits
         const chunkSize = 10
         const chunks = chunk(transactions, chunkSize)
-        const retryLimit = 4
-        const delayTime = 500
+        const retryLimit = 6
+        const delayTime = 375
         const receipts = []
         for (const transactionChunk of chunks) {
             let retries = 0
@@ -117,21 +117,8 @@ export default class Arbitrum implements L2 {
         }
 
         const flatReceipts: { receipt: any }[] = receipts
-            .map(({ receipts }) => {
-                return receipts.map((receipt: any, index: number) => {
-                    return {
-                        receipt,
-                    }
-                })
-            })
-            .flat()
-            .filter(
-                receipt =>
-                    receipt.receipt !== null &&
-                    receipt.receipt !== undefined &&
-                    receipt.receipt.l1BlockNumber !== null &&
-                    receipt.receipt.l1BlockNumber !== undefined
-            )
+            .flatMap(({ receipts }) => receipts)
+            .filter(receipt => receipt?.l1BlockNumber != null)
 
         this.onSavingCalculated({
             text: "Fetching transaction receipts",

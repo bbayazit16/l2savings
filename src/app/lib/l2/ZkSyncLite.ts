@@ -193,10 +193,6 @@ export default class ZkSyncLite implements L2 {
 
         let transactionsCalculated = 0
         for (const transaction of reversedTransactions) {
-            // if (!Utils.connected) {
-            //     throw new Error("Cancelled")
-            // }
-
             const op = transaction.op
 
             let feeToken = op.feeToken || 0
