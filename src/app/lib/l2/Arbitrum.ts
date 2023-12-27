@@ -39,12 +39,22 @@ export default class Arbitrum implements L2 {
     private onSavingCalculated: (progress: CalcProgress) => void
 
     /**
+     * Optional abort signal, used to cancel the request
+     */
+    private signal?: AbortSignal
+
+    /**
      * @param address a valid 20 byte address as hex string with 0x prefix, 42 characters total
      * @param onTransactionCalculated a callback to call when the savings of a transaction is calculated
      */
-    public constructor(address: string, onTransactionCalculated: (progress: CalcProgress) => void) {
+    public constructor(
+        address: string,
+        onTransactionCalculated: (progress: CalcProgress) => void,
+        signal?: AbortSignal
+    ) {
         this.address = address
         this.onSavingCalculated = onTransactionCalculated
+        this.signal = signal
     }
 
     /**
@@ -87,8 +97,16 @@ export default class Arbitrum implements L2 {
         const delayTime = 375
         const receipts = []
         for (const transactionChunk of chunks) {
+            if (this.signal && this.signal.aborted) {
+                throw new Error("Aborted: Arbitrum")
+            }
+
             let retries = 0
             while (retries < retryLimit) {
+                if (this.signal && this.signal.aborted) {
+                    throw new Error("Aborted: Arbitrum")
+                }
+
                 try {
                     const batchReceipts = await getBatchCustomReceipts(
                         process.env.NEXT_PUBLIC_ARBITRUM_RPC!,
@@ -106,7 +124,9 @@ export default class Arbitrum implements L2 {
                     })
                     break
                 } catch (error) {
-                    console.error(`Error fetching receipts for chunk in Arbitrum. Retrying: ${error}`)
+                    console.error(
+                        `Error fetching receipts for chunk in Arbitrum. Retrying: ${error}`
+                    )
                     await new Promise(resolve => setTimeout(resolve, delayTime))
 
                     retries++
@@ -138,8 +158,16 @@ export default class Arbitrum implements L2 {
             })
         })
 
+        if (this.signal && this.signal.aborted) {
+            throw new Error("Aborted: Arbitrum")
+        }
+
         let transactionsCalculated = 0
         for (const receipt of flatReceipts) {
+            if (this.signal && this.signal.aborted) {
+                throw new Error("Aborted: Arbitrum")
+            }
+
             // L2Gas including L1 calldata
             const L2Gas = parseInt(receipt.gasUsed, 16)
 
@@ -177,6 +205,10 @@ export default class Arbitrum implements L2 {
             current: transactionsCalculated,
             total: transactionsCalculated,
         })
+
+        if (this.signal && this.signal.aborted) {
+            throw new Error("Aborted: Arbitrum")
+        }
 
         const totalL1FeesUsd = await EthFees.ethToUsd(totalL1Fees)
         const totalL2FeesUsd = await EthFees.ethToUsd(totalL2Fees)

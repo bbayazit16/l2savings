@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useCallback, useEffect, useState } from "react"
+import { createContext, useCallback, useEffect, useRef, useState } from "react"
 import { noProgress, noSavings } from "../lib/constants"
 
 import SavingsData from "../lib/savingsdata"
@@ -35,66 +35,104 @@ export default function SavingsProvider({ children }: { children: React.ReactNod
 
     const { account } = useAccount()
 
-    const calculateAllSavings = useCallback(async () => {
-        if (!account) return
-
-        setSavingsStartedFetching(true)
-
-        const promises = [
-            new Optimism(account.address, setOptimismSavingsCalculated).calculateSavings(),
-            new Arbitrum(account.address, setArbitrumSavingsCalculated).calculateSavings(),
-            new ZkSyncLite(account.address, setZkSyncLiteSavingsCalculated).calculateSavings(),
-            new Linea(account.address, setLineaSavingsCalculated).calculateSavings(),
-        ]
-
-        const results = await Promise.allSettled(promises)
-
-        const [optimismSavings, arbitrumSavings, zkSyncLiteSavings, lineaSavings] = results.map(
-            result => {
-                if (result.status === "fulfilled") {
-                    return result.value
-                } else {
-                    console.error("Error calculating savings for a service:", result.reason)
-                    return JSON.parse(JSON.stringify(noSavings)) as Savings
-                }
-            }
-        )
-
-        const savings = SavingsData.calculateTotalSavings(
-            optimismSavings,
-            arbitrumSavings,
-            zkSyncLiteSavings,
-            lineaSavings
-        )
-
-        setAllSavings({
-            optimism: optimismSavings,
-            arbitrum: arbitrumSavings,
-            zkSyncLite: zkSyncLiteSavings,
-            linea: lineaSavings,
-            all: savings,
-        })
-
+    const resetSavings = () => {
+        setAllSavings(undefined)
         setSavingsStartedFetching(false)
-    }, [account])
+        setOptimismSavingsCalculated(noProgress)
+        setArbitrumSavingsCalculated(noProgress)
+        setZkSyncLiteSavingsCalculated(noProgress)
+        setLineaSavingsCalculated(noProgress)
+    }
+
+    const calculateAllSavings = useCallback(
+        async (signal: AbortSignal) => {
+            if (!account) return
+
+            const promises = [
+                new Optimism(
+                    account.address,
+                    setOptimismSavingsCalculated,
+                    signal
+                ).calculateSavings(),
+                new Arbitrum(
+                    account.address,
+                    setArbitrumSavingsCalculated,
+                    signal
+                ).calculateSavings(),
+                new ZkSyncLite(
+                    account.address,
+                    setZkSyncLiteSavingsCalculated,
+                    signal
+                ).calculateSavings(),
+                new Linea(account.address, setLineaSavingsCalculated, signal).calculateSavings(),
+            ]
+
+            const results = await Promise.allSettled(promises)
+
+            const [optimismSavings, arbitrumSavings, zkSyncLiteSavings, lineaSavings] = results.map(
+                result => {
+                    if (result.status === "fulfilled") {
+                        return result.value
+                    } else {
+                        console.error("Error calculating savings for a service:", result.reason)
+                        return JSON.parse(JSON.stringify(noSavings)) as Savings
+                    }
+                }
+            )
+
+            if (signal.aborted) return
+
+            const savings = SavingsData.calculateTotalSavings(
+                optimismSavings,
+                arbitrumSavings,
+                zkSyncLiteSavings,
+                lineaSavings
+            )
+
+            if (signal.aborted) return
+
+            return {
+                optimism: optimismSavings,
+                arbitrum: arbitrumSavings,
+                zkSyncLite: zkSyncLiteSavings,
+                linea: lineaSavings,
+                all: savings,
+            }
+        },
+        [account]
+    )
 
     useEffect(() => {
-        calculateAllSavings()
-    }, [calculateAllSavings])
+        const abortController = new AbortController()
+
+        const fetchSavings = async () => {
+            if (!account) {
+                abortController.abort()
+                resetSavings()
+                return
+            }
+
+            setSavingsStartedFetching(true)
+            const savings = await calculateAllSavings(abortController.signal)
+
+            setAllSavings(savings)
+            setSavingsStartedFetching(false)
+        }
+
+        fetchSavings()
+
+        return () => {
+            abortController.abort()
+            resetSavings()
+        }
+    }, [calculateAllSavings, account])
 
     return (
         <SavingsContext.Provider
             value={{
                 savings: allSavings,
                 localizedSavings: SavingsData.localize(allSavings),
-                resetSavings: () => {
-                    setAllSavings(undefined)
-                    setSavingsStartedFetching(false)
-                    setOptimismSavingsCalculated(noProgress)
-                    setArbitrumSavingsCalculated(noProgress)
-                    setZkSyncLiteSavingsCalculated(noProgress)
-                    setLineaSavingsCalculated(noProgress)
-                },
+                resetSavings,
                 progress: {
                     optimism: optimismSavingsCalculated,
                     arbitrum: arbitrumSavingsCalculated,

@@ -99,12 +99,22 @@ export default class ZkSyncLite implements L2 {
     }
 
     /**
+     * Optional abort signal, used to cancel the request
+     */
+    private signal?: AbortSignal
+
+    /**
      * @param address a valid 20 byte address as hex string with 0x prefix, 42 characters total
      * @param onTransactionCalculated a callback to call when the savings of a transaction is calculated
      */
-    public constructor(address: string, onTransactionCalculated: (progress: CalcProgress) => void) {
+    public constructor(
+        address: string,
+        onTransactionCalculated: (progress: CalcProgress) => void,
+        signal?: AbortSignal
+    ) {
         this.address = address
         this.onSavingCalculated = onTransactionCalculated
+        this.signal = signal
     }
 
     /**
@@ -118,6 +128,10 @@ export default class ZkSyncLite implements L2 {
         const allTransactions: any[][] = []
 
         while (fetchedTxCount < this.MAX_SUPPORTED_TRANSACTIONS) {
+            if (this.signal && this.signal.aborted) {
+                throw new Error("Aborted: ZkSyncLite")
+            }
+
             const transactions: any[] = (
                 await customFetch(
                     `https://api.zksync.io/api/v0.2/accounts/${this.address}/transactions?from=${from}&limit=100&direction=older`
@@ -187,12 +201,20 @@ export default class ZkSyncLite implements L2 {
 
         const allSavings: TransactionSavings[] = []
 
+        if (this.signal && this.signal.aborted) {
+            throw new Error("Aborted: ZkSyncLite")
+        }
+
         EthFees.cacheGasTimestamps(
             reversedTransactions.map(tx => Math.round(new Date(tx.createdAt).getTime() / 1000))
         )
 
         let transactionsCalculated = 0
         for (const transaction of reversedTransactions) {
+            if (this.signal && this.signal.aborted) {
+                throw new Error("Aborted: ZkSyncLite")
+            }
+
             const op = transaction.op
 
             let feeToken = op.feeToken || 0
@@ -206,6 +228,10 @@ export default class ZkSyncLite implements L2 {
                     op.from.toLowerCase() === this.address.toLowerCase(): {
                     feeToken = feeToken || transaction.op.token
                     const transferType = op.token === 0 ? "ETHTransfer" : "ERC20Transfer"
+
+                    if (this.signal && this.signal.aborted) {
+                        throw new Error("Aborted: ZkSyncLite")
+                    }
 
                     // Calculate the batch transaction price
                     if (transaction.batchId) {
@@ -267,12 +293,20 @@ export default class ZkSyncLite implements L2 {
                         }
                     }
 
+                    if (this.signal && this.signal.aborted) {
+                        throw new Error("Aborted: ZkSyncLite")
+                    }
+
                     const L2Fee = await this.zkSyncFee(
                         feeToken,
                         EthFees.weiToEther(op.fee),
                         txTimestamp,
                         false
                     )
+
+                    if (this.signal && this.signal.aborted) {
+                        throw new Error("Aborted: ZkSyncLite")
+                    }
 
                     const L1Fee = await EthFees.averageDailyFee(
                         txTimestamp,
@@ -305,12 +339,20 @@ export default class ZkSyncLite implements L2 {
                     break
                 }
                 case transactionType === "Swap" || transactionType === "MintNFT": {
+                    if (this.signal && this.signal.aborted) {
+                        throw new Error("Aborted: ZkSyncLite")
+                    }
+
                     const L2Fee = await this.zkSyncFee(
                         feeToken,
                         EthFees.weiToEther(op.fee),
                         txTimestamp,
                         true
                     )
+
+                    if (this.signal && this.signal.aborted) {
+                        throw new Error("Aborted: ZkSyncLite")
+                    }
 
                     const L1Fee = await EthFees.averageDailyFee(
                         txTimestamp,
@@ -355,6 +397,10 @@ export default class ZkSyncLite implements L2 {
             current: allSavings.length,
             total: allSavings.length,
         })
+
+        if (this.signal && this.signal.aborted) {
+            throw new Error("Aborted: ZkSyncLite")
+        }
 
         const totalL1FeesUsd = await EthFees.ethToUsd(totalL1Fees)
         const totalL2FeesUsd = await EthFees.ethToUsd(totalL2Fees)

@@ -32,12 +32,22 @@ export default class Linea implements L2 {
     private onSavingCalculated: (progress: CalcProgress) => void
 
     /**
+     * Optional abort signal, used to cancel the request
+     */
+    private signal?: AbortSignal
+
+    /**
      * @param address a valid 20 byte address as hex string with 0x prefix, 42 characters total
      * @param onTransactionCalculated a callback to call when the savings of a transaction is calculated
      */
-    public constructor(address: string, onTransactionCalculated: (progress: CalcProgress) => void) {
+    public constructor(
+        address: string,
+        onTransactionCalculated: (progress: CalcProgress) => void,
+        signal?: AbortSignal
+    ) {
         this.address = address
         this.onSavingCalculated = onTransactionCalculated
+        this.signal = signal
     }
 
     /**
@@ -81,8 +91,16 @@ export default class Linea implements L2 {
         const delayTime = 375
         const receipts = []
         for (const transactionChunk of chunks) {
+            if (this.signal && this.signal.aborted) {
+                throw new Error("Aborted: Linea")
+            }
+
             let retries = 0
             while (retries < retryLimit) {
+                if (this.signal && this.signal.aborted) {
+                    throw new Error("Aborted: Linea")
+                }
+
                 try {
                     const batchReceipts = await getBatchCustomReceipts(
                         process.env.NEXT_PUBLIC_LINEA_RPC!,
@@ -104,7 +122,7 @@ export default class Linea implements L2 {
                 } catch (error) {
                     console.error(`Error fetching receipts for chunk in Linea. Retrying: ${error}`)
                     await new Promise(resolve => setTimeout(resolve, delayTime))
-                    
+
                     retries++
                     if (retries === retryLimit) {
                         throw new Error(`Failed to fetch receipts after ${retryLimit} retries.`)
@@ -133,8 +151,16 @@ export default class Linea implements L2 {
             total: flatReceipts.length,
         })
 
+        if (this.signal && this.signal.aborted) {
+            throw new Error("Aborted: Linea")
+        }
+
         let transactionsCalculated = 0
         for (const { receipt, gasPrice, timestamp } of flatReceipts) {
+            if (this.signal && this.signal.aborted) {
+                throw new Error("Aborted: Linea")
+            }
+
             const L2Fee = EthFees.weiToEther(BigInt(receipt.gasUsed) * BigInt(gasPrice))
 
             // evm equivalence
@@ -170,6 +196,10 @@ export default class Linea implements L2 {
             current: transactionsCalculated,
             total: transactionsCalculated,
         })
+
+        if (this.signal && this.signal.aborted) {
+            throw new Error("Aborted: Linea")
+        }
 
         const totalL1FeesUsd = await EthFees.ethToUsd(totalL1Fees)
         const totalL2FeesUsd = await EthFees.ethToUsd(totalL2Fees)
