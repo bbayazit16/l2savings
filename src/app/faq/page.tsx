@@ -70,7 +70,7 @@ export default function Faq() {
                     transfers, 50,000 for ERC20 transfers, 105,000 for swaps, and 210,000 for NFT
                     mints. The algorithm for ZkSync Lite is relatively complex, see the{" "}
                     <a
-                        href="/"
+                        href="https://github.com/bbayazit16/l2savings/blob/master/src/app/lib/l2/ZkSyncLite.ts#L24"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-500 hover:underline max-w-fit"
