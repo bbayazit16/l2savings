@@ -116,11 +116,6 @@ export default class Optimism implements L2 {
                 )
 
                 onChunk += chunk.length
-                this.onSavingCalculated({
-                    text: "Fetching transaction receipts",
-                    current: onChunk,
-                    total: transactions.length,
-                })
                 return {
                     receipts,
                     gasPrices: chunk.map(ch => ch.gasPrice),

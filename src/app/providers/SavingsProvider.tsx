@@ -35,30 +35,30 @@ export default function SavingsProvider({ children }: { children: React.ReactNod
 
     const { account } = useAccount()
 
-    // useCallback to memoize the function calculateAllSavings
     const calculateAllSavings = useCallback(async () => {
         if (!account) return
 
         setSavingsStartedFetching(true)
 
-        const [optimismSavings, arbitrumSavings, zkSyncLiteSavings, lineaSavings] =
-            await Promise.all([
-                new Optimism(account.address, setOptimismSavingsCalculated).calculateSavings(),
-                new Arbitrum(account.address, setArbitrumSavingsCalculated).calculateSavings(),
-                new ZkSyncLite(account.address, setZkSyncLiteSavingsCalculated).calculateSavings(),
-                new Linea(account.address, setLineaSavingsCalculated).calculateSavings(),
-            ]).catch(e => {
-                console.error(e)
-                setOptimismSavingsCalculated(noProgress)
-                setArbitrumSavingsCalculated(noProgress)
-                setZkSyncLiteSavingsCalculated(noProgress)
-                setLineaSavingsCalculated(noProgress)
-                return [
-                    JSON.parse(JSON.stringify(noSavings)) as Savings,
-                    JSON.parse(JSON.stringify(noSavings)) as Savings,
-                    JSON.parse(JSON.stringify(noSavings)) as Savings,
-                ]
-            })
+        const promises = [
+            new Optimism(account.address, setOptimismSavingsCalculated).calculateSavings(),
+            new Arbitrum(account.address, setArbitrumSavingsCalculated).calculateSavings(),
+            new ZkSyncLite(account.address, setZkSyncLiteSavingsCalculated).calculateSavings(),
+            new Linea(account.address, setLineaSavingsCalculated).calculateSavings(),
+        ]
+
+        const results = await Promise.allSettled(promises)
+
+        const [optimismSavings, arbitrumSavings, zkSyncLiteSavings, lineaSavings] = results.map(
+            result => {
+                if (result.status === "fulfilled") {
+                    return result.value
+                } else {
+                    console.error("Error calculating savings for a service:", result.reason)
+                    return JSON.parse(JSON.stringify(noSavings)) as Savings
+                }
+            }
+        )
 
         const savings = SavingsData.calculateTotalSavings(
             optimismSavings,
@@ -93,6 +93,7 @@ export default function SavingsProvider({ children }: { children: React.ReactNod
                     setOptimismSavingsCalculated(noProgress)
                     setArbitrumSavingsCalculated(noProgress)
                     setZkSyncLiteSavingsCalculated(noProgress)
+                    setLineaSavingsCalculated(noProgress)
                 },
                 progress: {
                     optimism: optimismSavingsCalculated,

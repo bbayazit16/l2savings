@@ -103,16 +103,37 @@ export default class EthFees {
     }
 
     public static async getGasFeesAtBlocks(
-        l1Blocks: string[]
+        l1Blocks: string[],
+        currentProgress?: (current: number) => void
     ): Promise<{ [blockNumber: string]: bigint }> {
         const chunkSize = 10
-        const chunkedBlocks = chunk(l1Blocks, chunkSize)
-        const promises = chunkedBlocks.map(chunk => getBatchL1FeeHistory(chunk))
+        const delayTime = 100
+        const retryLimit = 4
 
-        const results = await Promise.all(promises)
-        return results.reduce((acc, current) => {
-            return { ...acc, ...current }
-        }, {})
+        const chunkedBlocks = chunk(l1Blocks, chunkSize)
+        let allResults: { [blockNumber: string]: bigint } = {}
+
+        for (let i = 0; i < chunkedBlocks.length; i++) {
+            let retries = 0
+            while (retries < retryLimit) {
+                try {
+                    const result = await getBatchL1FeeHistory(chunkedBlocks[i])
+                    allResults = { ...allResults, ...result }
+                    if (currentProgress) currentProgress(i * chunkSize)
+                    break
+                } catch (error) {
+                    console.error(`Error fetching data for chunk: ${error}`)
+                    retries++
+                    if (retries === retryLimit) {
+                        throw new Error(`Failed to fetch data after ${retryLimit} retries.`)
+                    }
+                }
+            }
+            await new Promise(resolve => setTimeout(resolve, delayTime))
+        }
+
+        if (currentProgress) currentProgress(l1Blocks.length)
+        return allResults
     }
 
     public static async cacheGasTimestamps(timestamps: number[]) {

@@ -91,11 +91,6 @@ export default class Arbitrum implements L2 {
                     chunk.map(chunk_1 => chunk_1.hash)
                 )
                 onChunk += chunk.length
-                this.onSavingCalculated({
-                    text: "Fetching transaction receipts",
-                    current: onChunk,
-                    total: transactions.length,
-                })
                 return {
                     receipts,
                     timestamps: chunk.map(ch => ch.timestamp),
@@ -129,9 +124,16 @@ export default class Arbitrum implements L2 {
 
         const l1Blocks = flatReceipts.map(receipt => receipt.receipt.l1BlockNumber)
 
-        const gasFeesAtL1Blocks = await EthFees.getGasFeesAtBlocks(l1Blocks)
+        const gasFeesAtL1Blocks = await EthFees.getGasFeesAtBlocks(l1Blocks, (current: number) => {
+            this.onSavingCalculated({
+                text: "Fetching transaction receipts",
+                current,
+                total: flatReceipts.length,
+            })
+        })
 
         let transactionsCalculated = 0
+        // Timestamp is no longer required, but it's still here just in case.
         for (const { receipt, timestamp } of flatReceipts) {
             // L2Gas including L1 calldata
             const L2Gas = parseInt(receipt.gasUsed, 16)
@@ -148,12 +150,6 @@ export default class Arbitrum implements L2 {
             )
 
             transactionsCalculated++
-
-            this.onSavingCalculated({
-                text: "Calculating fees",
-                current: transactionsCalculated,
-                total: transactions.length,
-            })
 
             allSavings.push({
                 L2: "arbitrum",
