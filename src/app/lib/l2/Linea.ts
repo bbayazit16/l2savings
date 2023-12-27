@@ -187,8 +187,8 @@ export default class Linea implements L2 {
                 },
             },
             saved: {
-                ether: totalL1Fees + totalL2Fees,
-                usd: totalL1FeesUsd + totalL2FeesUsd,
+                ether: totalL1Fees - totalL2Fees,
+                usd: totalL1FeesUsd - totalL2FeesUsd,
                 timesCheaper: totalL1Fees / totalL2Fees,
             },
             details: allSavings,
