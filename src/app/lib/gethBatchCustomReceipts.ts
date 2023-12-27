@@ -18,6 +18,7 @@ export default async function getBatchCustomReceipts(url: string, hashes: string
 
     return response.map((res: any) => {
         if (!res.result) {
+            console.log(res)
             throw new Error(`Api limit`)
         }
         return res.result

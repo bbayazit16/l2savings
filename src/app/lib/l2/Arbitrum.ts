@@ -106,7 +106,9 @@ export default class Arbitrum implements L2 {
                     })
                     break
                 } catch (error) {
-                    console.error(`Error fetching receipts for chunk: ${error}`)
+                    console.error(`Error fetching receipts for chunk in Arbitrum. Retrying: ${error}`)
+                    await new Promise(resolve => setTimeout(resolve, delayTime))
+
                     retries++
                     if (retries === retryLimit) {
                         throw new Error(`Failed to fetch receipts after ${retryLimit} retries.`)
