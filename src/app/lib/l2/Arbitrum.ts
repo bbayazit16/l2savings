@@ -82,28 +82,45 @@ export default class Arbitrum implements L2 {
 
         // Update 2023-12-25: Trying limits of 10 due to api limits
         const chunkSize = 10
+        const chunks = chunk(transactions, chunkSize)
+        const retryLimit = 4
+        const delayTime = 500
+        const receipts = []
+        for (const transactionChunk of chunks) {
+            let retries = 0
+            while (retries < retryLimit) {
+                try {
+                    const batchReceipts = await getBatchCustomReceipts(
+                        process.env.NEXT_PUBLIC_ARBITRUM_RPC!,
+                        transactionChunk.map(tx => tx.hash)
+                    )
 
-        let onChunk = 0
-        const receipts = await Promise.all(
-            chunk(transactions, chunkSize).map(async chunk => {
-                const receipts = await getBatchCustomReceipts(
-                    process.env.NEXT_PUBLIC_ARBITRUM_RPC!,
-                    chunk.map(chunk_1 => chunk_1.hash)
-                )
-                onChunk += chunk.length
-                return {
-                    receipts,
-                    timestamps: chunk.map(ch => ch.timestamp),
+                    this.onSavingCalculated({
+                        text: "Fetching transaction receipts",
+                        current: receipts.length,
+                        total: chunks.length,
+                    })
+
+                    receipts.push({
+                        receipts: batchReceipts,
+                    })
+                    break
+                } catch (error) {
+                    console.error(`Error fetching receipts for chunk: ${error}`)
+                    retries++
+                    if (retries === retryLimit) {
+                        throw new Error(`Failed to fetch receipts after ${retryLimit} retries.`)
+                    }
                 }
-            })
-        )
+            }
+            await new Promise(resolve => setTimeout(resolve, delayTime))
+        }
 
-        const flatReceipts: { receipt: any; timestamp: number }[] = receipts
-            .map(({ receipts, timestamps }) => {
+        const flatReceipts: { receipt: any }[] = receipts
+            .map(({ receipts }) => {
                 return receipts.map((receipt: any, index: number) => {
                     return {
                         receipt,
-                        timestamp: timestamps[index],
                     }
                 })
             })
@@ -133,8 +150,7 @@ export default class Arbitrum implements L2 {
         })
 
         let transactionsCalculated = 0
-        // Timestamp is no longer required, but it's still here just in case.
-        for (const { receipt, timestamp } of flatReceipts) {
+        for (const { receipt } of flatReceipts) {
             // L2Gas including L1 calldata
             const L2Gas = parseInt(receipt.gasUsed, 16)
 

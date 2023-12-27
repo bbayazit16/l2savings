@@ -106,22 +106,40 @@ export default class Optimism implements L2 {
 
         // Update 2023-12-25: Trying limits of 10 due to api limits
         const chunkSize = 10
+        const chunks = chunk(transactions, chunkSize)
+        const retryLimit = 4
+        const delayTime = 500
+        const receipts = []
+        for (const transactionChunk of chunks) {
+            let retries = 0
+            while (retries < retryLimit) {
+                try {
+                    const batchReceipts = await getBatchCustomReceipts(
+                        process.env.NEXT_PUBLIC_OPTIMISM_RPC!,
+                        transactionChunk.map(tx => tx.hash)
+                    )
 
-        let onChunk = 0
-        const receipts = await Promise.all(
-            chunk(transactions, chunkSize).map(async chunk => {
-                const receipts = await getBatchCustomReceipts(
-                    process.env.NEXT_PUBLIC_OPTIMISM_RPC!,
-                    chunk.map(chunk_1 => chunk_1.hash)
-                )
+                    this.onSavingCalculated({
+                        text: "Fetching transaction receipts",
+                        current: receipts.length,
+                        total: chunks.length,
+                    })
 
-                onChunk += chunk.length
-                return {
-                    receipts,
-                    gasPrices: chunk.map(ch => ch.gasPrice),
+                    receipts.push({
+                        receipts: batchReceipts,
+                        gasPrices: transactionChunk.map(tx => tx.gasPrice),
+                    })
+                    break
+                } catch (error) {
+                    console.error(`Error fetching receipts for chunk: ${error}`)
+                    retries++
+                    if (retries === retryLimit) {
+                        throw new Error(`Failed to fetch receipts after ${retryLimit} retries.`)
+                    }
                 }
-            })
-        )
+            }
+            await new Promise(resolve => setTimeout(resolve, delayTime))
+        }
 
         const flatReceipts = receipts
             .map(({ receipts, gasPrices }) => {

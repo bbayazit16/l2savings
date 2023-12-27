@@ -15,8 +15,11 @@ export default async function getBatchCustomReceipts(url: string, hashes: string
             }))
         ),
     })
-    // Wait for two seconds after batch requests to avoid limits
-    await new Promise(p => setTimeout(p, 2000))
 
-    return response.map((res: any) => res.result)
+    return response.map((res: any) => {
+        if (!res.result) {
+            throw new Error(`Api limit`)
+        }
+        return res.result
+    })
 }
