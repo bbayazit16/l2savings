@@ -52,7 +52,8 @@ export default function Faq() {
                     costs). Since eth_getTransactionReceipt includes the L1 block number, we can use
                     this to query eth_feeHistory to get the median of the L1 average gas price
                     during the time of the transaction. So, Nitro upgrade actually made transactions
-                    cheaper and easier to calculate savings!
+                    cheaper and easier to calculate savings! For this reason, L2Savings only
+                    supports transactions after Arbitrum Nitro.
                 </p>
             </div>
 
