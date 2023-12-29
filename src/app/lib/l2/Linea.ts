@@ -85,10 +85,11 @@ export default class Linea implements L2 {
         // const chunkSize = transactions.length > 1_000 ? 10 : 5
 
         // Update 2023-12-25: Trying limits of 10 due to api limits
-        const chunkSize = 10
+        // Update 2023-12-29: Trying limits of 20 with delayTime 200 and retryLimit 16
+        const chunkSize = 20
         const chunks = chunk(transactions, chunkSize)
-        const retryLimit = 6
-        const delayTime = 375
+        const retryLimit = 16
+        const delayTime = 200
         const receipts = []
         for (const transactionChunk of chunks) {
             if (this.signal && this.signal.aborted) {

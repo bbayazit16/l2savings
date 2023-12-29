@@ -8,7 +8,7 @@ import useAccount from "@/app/hooks/useAccount"
 import useSavings from "@/app/hooks/useSavings"
 
 const Spinner = () => (
-    <div className="animate-spin rounded-full h-6 w-6 border-4 border-t-white border-r-transparent border-b-gray-300 border-l-transparent dark:border-t-gray-900 dark:border-b-gray-600"></div>
+    <div className="animate-spin rounded-full h-6 w-6 border-4 border-t-white border-r-transparent border-b-gray-300 border-l-transparent dark:border-t-gray-900 dark:border-b-gray-600" />
 )
 
 export default function EnterAddress() {

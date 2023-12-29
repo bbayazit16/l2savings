@@ -106,9 +106,10 @@ export default class EthFees {
         l1Blocks: string[],
         currentProgress?: (current: number) => void
     ): Promise<{ [blockNumber: string]: bigint }> {
-        const chunkSize = 10
-        const delayTime = 375
-        const retryLimit = 6
+        // Update 2023-12-29: Trying limits of 20 with delayTime 200
+        const chunkSize = 20
+        const delayTime = 100
+        const retryLimit = 16
 
         const chunkedBlocks = chunk(l1Blocks, chunkSize)
         let allResults: { [blockNumber: string]: bigint } = {}

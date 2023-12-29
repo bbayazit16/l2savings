@@ -52,18 +52,11 @@ export const noSavingsLocalized = {
     details: [],
 }
 
-type CommonL2Color = {
-    dataColor: string
-    chainColor: string
-}
-
-type L2Colors = {
-    dataColor: string
-    chainColor: string
-}
-
 type ColorMapType = {
-    [K in AvailableL2s]: L2Colors
+    [K in AvailableL2s]: {
+        dataColor: string
+        chainColor: string
+    }
 } & {
     mainnet: string
 }
