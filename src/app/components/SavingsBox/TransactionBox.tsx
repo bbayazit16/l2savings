@@ -9,7 +9,8 @@ import chainToAsset from "@/app/lib/chainToAssetSrc"
 import sortBy from "@/app/lib/sortBy"
 import clsx from "clsx"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect, useRef } from "react"
+import Button from "../Button"
 
 type SortByProps = {
     key: keyof TransactionSavingsLocalized | "dont"
@@ -19,6 +20,12 @@ type SortByProps = {
 export default function TransactionBox() {
     const { localizedSavings } = useSavings()
     const { chosenL2 } = useChosenL2()
+
+    const [displayedCountsByChain, setDisplayedCountsByChain] = useState<
+        Partial<{ [K in AvailableL2s]: number }>
+    >({})
+
+    const scrollContainerRef = useRef<HTMLDivElement>(null)
 
     const [triangleIsReverse, setTriangleIsReverse] = useState({
         L2: false,
@@ -56,12 +63,62 @@ export default function TransactionBox() {
         return sortBy(details, sortByProps.key)
     }, [details, sortByProps.key])
 
+    useEffect(() => {
+        setDisplayedCountsByChain(prevCounts => ({
+            ...prevCounts,
+            [chosenL2]: prevCounts[chosenL2] || 20,
+        }))
+
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollTop = 0
+        }
+    }, [chosenL2])
+
     return (
-        <div className="flex flex-col overflow-y-scroll h-64 lg:h-96 w-full border-zinc-800 dark:border-white border-2 p-4 rounded-lg">
+        <div
+            ref={scrollContainerRef}
+            className="w-full flex flex-col overflow-y-scroll h-64 lg:h-96 border-zinc-800 dark:border-white border-2 p-4 rounded-lg"
+        >
             <table className="w-full">
                 <TableHeader changeSortBy={changeSortBy} triangleIsReverse={triangleIsReverse} />
-                <TableBody transactions={sortedTransactions} order={sortByProps.order} />
+                <TableBody
+                    transactions={sortedTransactions}
+                    order={sortByProps.order}
+                    displayedCount={displayedCountsByChain[chosenL2] || 20}
+                />
             </table>
+            <div className="relative w-full flex flex-row m-auto justify-center items-center mt-4 space-x-4">
+                <Button
+                    onClick={() => {
+                        setDisplayedCountsByChain(prevCounts => ({
+                            ...prevCounts,
+                            [chosenL2]: (prevCounts[chosenL2] || 20) + 20,
+                        }))
+                    }}
+                    disabled={(displayedCountsByChain[chosenL2] || 20) >= sortedTransactions.length}
+                >
+                    {(displayedCountsByChain[chosenL2] || 20) < sortedTransactions.length
+                        ? "Load more"
+                        : sortedTransactions.length === 0
+                        ? "No transactions"
+                        : "No more transactions"}
+                </Button>
+                {(displayedCountsByChain[chosenL2] || 20) < sortedTransactions.length && (
+                    <Button
+                        onClick={() => {
+                            setDisplayedCountsByChain(prevCounts => ({
+                                ...prevCounts,
+                                [chosenL2]: sortedTransactions.length,
+                            }))
+                        }}
+                        disabled={
+                            (displayedCountsByChain[chosenL2] || 20) >= sortedTransactions.length
+                        }
+                    >
+                        Load All
+                    </Button>
+                )}
+            </div>
         </div>
     )
 }
@@ -120,15 +177,17 @@ function SortIcon({ isReversed }: { isReversed: boolean }) {
 function TableBody({
     transactions,
     order,
+    displayedCount,
 }: {
     transactions: TransactionSavingsLocalized[]
     order: "asc" | "desc"
+    displayedCount: number
 }) {
     const transactionRows = order === "asc" ? transactions : [...transactions].reverse()
 
     return (
         <tbody>
-            {transactionRows.map(transaction => (
+            {transactionRows.slice(0, displayedCount).map(transaction => (
                 <tr key={transaction.hash}>
                     <td className="text-left p-4">
                         <ButtonImage
@@ -136,7 +195,8 @@ function TableBody({
                             alt="L2 Logo"
                             border={transaction.L2 === "optimism" || transaction.L2 === "base"}
                             className={clsx({
-                                "dark:invert": transaction.L2 === "linea" || transaction.L2 === "base",
+                                "dark:invert":
+                                    transaction.L2 === "linea" || transaction.L2 === "base",
                             })}
                             animate
                         />
